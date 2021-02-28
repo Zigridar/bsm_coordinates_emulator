@@ -5,10 +5,10 @@ export const vectorModule = (point1: Point, point2: Point) => {
     const dx = point1.x - point2.x
     const dy = point1.y - point2.y
 
-    return hypotenuse(dx, dy)
+    return calcHypotenuse(dx, dy)
 }
 
-export const hypotenuse = (width: number, height: number) => {
+export const calcHypotenuse = (width: number, height: number) => {
     return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
 }
 

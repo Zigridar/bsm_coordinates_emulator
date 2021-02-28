@@ -1,7 +1,9 @@
 import {ADD_FABRIC_OBJECT, CHANGE_CANVAS_DIM, CHANGE_SELECTION, MOVE_EVENT, REMOVE_FABRIC_OBJECT} from './actionTypes'
+import {calcHypotenuse} from '../utils'
 
 const initialState: FabricState = {
     bsmList: [],
+    hypotenuse: 0,
     canvasDim: [0, 0],
     selection: null
 }
@@ -19,9 +21,11 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
                 bsmList: state.bsmList.filter((item: BSM) => item.object !== action.object.object)
             }
         case CHANGE_CANVAS_DIM:
+            const hypotenuse = calcHypotenuse(...action.canvasDim)
             return {
                 ...state,
-                canvasDim: action.canvasDim
+                canvasDim: action.canvasDim,
+                hypotenuse
             }
         case CHANGE_SELECTION:
             return {

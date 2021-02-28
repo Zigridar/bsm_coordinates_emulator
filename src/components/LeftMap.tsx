@@ -2,11 +2,12 @@ import GeoZoneMapWithState from './GeoZoneMap'
 import React from 'react'
 import {connect} from 'react-redux'
 import {IEvent} from 'fabric/fabric-impl'
-import {hypotenuse, nonZeroCoords, vectorModule} from '../utils'
+import {calcHypotenuse, nonZeroCoords, vectorModule} from '../utils'
 import {MAX_RSSI} from '../constants'
 import {fabric} from 'fabric'
 import {Dispatch} from 'redux'
 import {changeSelectionAction} from '../redux/actionCreators'
+import store from '../redux/store'
 
 interface OwnProps {
     cardPadding: number
@@ -40,27 +41,16 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
 
 type LeftMapProps = OwnProps & StateProps & DispatchProps
 
-//todo make it better
-let globalBsmList: BSM[] = []
-let globalCanvasDim: [number, number] = [0, 0]
-
 const LeftMap: React.FC<LeftMapProps>= (props: LeftMapProps) => {
-
-    //todo make it better
-    globalBsmList = props.bsmList
-    globalCanvasDim = props.canvasDim
-
-    console.log(`render LeftMap, globalBsmList: ${globalBsmList.length}`)
 
     const canvasHandlers: Array<[string, (e: IEvent) => void]> = [
         [
             'mouse:move',
             (e: IEvent) => {
-                globalBsmList.forEach((bsm: BSM) => {
+                store.getState().bsmList.forEach((bsm: BSM) => {
                     const center = bsm.object.getCenterPoint()
                     const module = vectorModule(center, nonZeroCoords(e.pointer))
-                    const hyp = hypotenuse(...globalCanvasDim)
-
+                    const hyp = store.getState().hypotenuse
                     const calc = MAX_RSSI * (1 - module / hyp)
                     const rssi = calc >= 0 ? calc : 0
                     bsm.setText(`${rssi.toFixed(2)}`)
@@ -87,7 +77,7 @@ const LeftMap: React.FC<LeftMapProps>= (props: LeftMapProps) => {
         ]
     ]
 
-    return(<GeoZoneMapWithState bsmList={globalBsmList} canvasHandlers={canvasHandlers} cardPadding={props.cardPadding}/>)
+    return(<GeoZoneMapWithState bsmList={store.getState().bsmList} canvasHandlers={canvasHandlers} cardPadding={props.cardPadding}/>)
 }
 
 const LeftMapWithState = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, mapDispatchToProps)(LeftMap)

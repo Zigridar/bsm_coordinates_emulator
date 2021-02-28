@@ -43,8 +43,6 @@ type GeoZoneMapProps = OwnProps & StateProps & DispatchProps
 /** interactive canvas view */
 const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
-    console.log(`render GeoZoneMap, bsmList: ${props.bsmList.length}`)
-
     /** static canvas id */
     const [CANVAS_ID] = useState<string>(`geo_zone_${Date.now()}`)
 

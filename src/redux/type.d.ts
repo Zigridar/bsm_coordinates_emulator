@@ -1,6 +1,7 @@
 type FabricState = {
     bsmList: BSM[]
     canvasDim: [number, number]
+    hypotenuse: number
     selection: fabric.Object
 }
 
