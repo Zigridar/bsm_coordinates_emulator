@@ -1,51 +1,49 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {fabric} from 'fabric'
 import {Canvas, IEvent} from 'fabric/fabric-impl'
-import {connect} from 'react-redux'
-import {Dispatch} from 'redux'
-import {changeCurrentCoordsAction} from '../redux/actionCreators'
+import {connect} from "react-redux";
+import {Dispatch} from "redux";
+import {changeCanvasDimAction} from "../redux/actionCreators";
 
-/** own props interface */
 interface OwnProps {
     cardPadding: number
-    canvasHandlers?: Map<string, (event: IEvent) => void>
+    canvasHandlers?: [string, (event: IEvent) => void][]
+    bsmList: BSM[]
 }
 
-/** state prop interface */
 interface StateProps {
-    bsmList: fabric.Object[]
+
 }
 
-/** dispatch prop interface */
 interface DispatchProps {
-    changeCoordsHandler: (coords: [number, number] ,current: fabric.Object) => void
+    changeDim: (dim: [number, number]) => void
 }
 
-/** map state to props */
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        bsmList: state.bsmList
+
     }
 
     return props
 }
 
-/** map dispatch to props */
 const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
     const props: DispatchProps = {
-        changeCoordsHandler: ((coords: [number, number], current: fabric.Object) => {
-            dispatch(changeCurrentCoordsAction(coords, current))
-        })
+        changeDim: (dim: [number, number]) => {
+            dispatch(changeCanvasDimAction(dim))
+        }
     }
 
     return props
 }
 
-/** compound component props type */
-type GeoZoneMapProps = StateProps & DispatchProps & OwnProps
+/** own props interface */
+type GeoZoneMapProps = OwnProps & StateProps & DispatchProps
 
 /** interactive canvas view */
 const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
+
+    console.log(`render GeoZoneMap, bsmList: ${props.bsmList.length}`)
 
     /** static canvas id */
     const [CANVAS_ID] = useState<string>(`geo_zone_${Date.now()}`)
@@ -115,12 +113,25 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
         })
 
+
+        const { canvasHandlers = [] } = props
+        
+        /** add additional handlers */
+        canvasHandlers.forEach((item: [string, (e: IEvent) => void]) => {
+            newCanvas.on(...item)
+        })
+
         //todo test
         setCanvas(() => newCanvas)
 
+
+        const initialDim = getDimensions()
+
+        props.changeDim([initialDim.width, initialDim.height])
+
         //todo test
         setDimensions({
-            ...getDimensions()
+            ...initialDim
         })
 
         return (() => window.removeEventListener('resize', handleResize))
@@ -128,20 +139,29 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
     /** refresh size **/
     useEffect(() => {
-        if (canvas)
-            canvas.setDimensions(getDimensions())
+        if (canvas) {
+            const dim = getDimensions()
+            canvas.setDimensions(dim)
+            props.changeDim([dim.width, dim.height])
+        }
     }, [dimensions])
 
     /** update */
     useEffect(() => {
-        if (canvas)
-            canvas.add(...props.bsmList)
+        if (canvas) {
+            const newObjects = props.bsmList.map((item: BSM) => item.object)
+            canvas.add(...newObjects)
+            canvas.getObjects().forEach((item: fabric.Object) => {
+                if (!newObjects.some(newItem => newItem === item))
+                    canvas.remove(item)
+            })
+            canvas.requestRenderAll()
+        }
     })
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }
 
-/** connect component to redux state */
 const GeoZoneMapWithState = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, mapDispatchToProps)(GeoZoneMap)
 
 export default GeoZoneMapWithState

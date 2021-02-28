@@ -32,9 +32,7 @@ type RightMapProps = OwnProps & StateProps & DispatchProps
 
 const RightMap: React.FC<RightMapProps>= (props: RightMapProps) => {
 
-
-
-    return(<GeoZoneMapWithState cardPadding={props.cardPadding}/>)
+    return(<GeoZoneMapWithState bsmList={[]} cardPadding={props.cardPadding}/>)
 }
 
 const RightMapWithState = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, mapDispatchToProps)(RightMap)

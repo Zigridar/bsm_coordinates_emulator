@@ -2,37 +2,39 @@ import {Header} from 'antd/es/layout/layout'
 import React from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
-import {Button} from "antd";
-import {Dispatch} from "redux";
-import {addFabricObjectAction, removeFabricObjectAction} from "../redux/actionCreators";
+import {Button, Space} from 'antd'
+import {Dispatch} from 'redux'
+import {addObjectAction, changeSelectionAction, removeObjectAction} from '../redux/actionCreators'
+import {DeleteOutlined, PlusOutlined} from '@ant-design/icons/lib'
 
 interface OwnProps {
 
 }
 
 interface StateProps {
-
+    selection: fabric.Object
 }
 
 interface DispatchProps {
-    addBsmToCanvas: (bsm: fabric.Object) => void
-    removeBsmFromCanvas: (bsm: fabric.Object) => void
+    addBsmToCanvas: (bsm: BSM) => void
+    removeSelected: (object: fabric.Object) => void
 }
 
-const mapStateToProps = () => {
+const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-
+        selection: state.selection
     }
     return props
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
     const props: DispatchProps = {
-        addBsmToCanvas: (bsm: fabric.Object) => {
-            dispatch(addFabricObjectAction(bsm))
+        addBsmToCanvas: (bsm: BSM) => {
+            dispatch(addObjectAction(bsm))
         },
-        removeBsmFromCanvas: (bsm: fabric.Object) => {
-            dispatch(removeFabricObjectAction(bsm))
+        removeSelected: (object: fabric.Object) => {
+            dispatch(removeObjectAction({object, setText: () => {}}))
+            dispatch(changeSelectionAction(null))
         }
     }
     return props
@@ -40,50 +42,55 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
 
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
-const createBsm = () => {
-    const circle = new fabric.Circle({
+const createBsm: () => BSM = () => {
+    const circleObject = new fabric.Circle({
         radius: 20,
-        // angle: 63,
-        // hasBorders: false,
-        fill: '#ff6620',
-        // hasControls: false
+        originX: 'center',
+        originY: 'center',
+        fill: '#ff6620'
     })
 
-    const text = new fabric.Text('kek', {
-
+    const textObject = new fabric.Text('', {
+        fontSize: 10,
+        originX: 'center',
+        originY: 'center'
     })
 
-    const group = new fabric.Group([circle, text], {
+    const group = new fabric.Group([circleObject, textObject], {
         hasControls: false,
-        // hasBorders: false
+        left: 0,
+        top: 0
     })
 
-    return group
+    return {
+        object: group,
+        setText: (text: string) => {
+            textObject.set('text', text)
+        }
+    }
 }
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
-    const addBsm = (e: React.MouseEvent) => {
-        e.preventDefault()
-        props.addBsmToCanvas(createBsm())
-    }
-
-    const removeBsm = (e: React.MouseEvent, bsm: fabric.Object) => {
-        e.preventDefault()
-    }
-
     return(
         <Header>
-            <Button
-                onClick={addBsm}
-            >
-                add BSM
-            </Button>
-            <Button
-                onClick={addBsm}
-            >
-                remove BSM
-            </Button>
+            <Space size={'middle'}>
+                <Button
+                    shape={'circle'}
+                    onClick={() => props.addBsmToCanvas(createBsm())}
+                    icon={<PlusOutlined/>}
+                    size={"large"}
+
+                />
+                <Button
+                    danger={true}
+                    shape={'circle'}
+                    onClick={() => props.removeSelected(props.selection)}
+                    disabled={!props.selection}
+                    icon={<DeleteOutlined/>}
+                    size={"large"}
+                />
+            </Space>
         </Header>
     )
 }
