@@ -37,7 +37,8 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         removeSelected: (object: fabric.Object) => {
             dispatch(removeObjectAction({
                 object,
-                setRssi: () => {},
+                setRssi: () => {}, //todo
+                setPrimaryColor: () => {}, //todo
                 rssi: 0
             }))
             dispatch(changeSelectionAction(null))
@@ -74,6 +75,9 @@ const createBsm: () => BSM = () => {
         setRssi (rssi: number) {
             this.rssi = rssi
             textObject.set('text', `${rssi.toFixed(2)}`)
+        },
+        setPrimaryColor () {
+
         }
     }
 }

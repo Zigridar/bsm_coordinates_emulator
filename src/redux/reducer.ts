@@ -2,17 +2,17 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT,
+    REMOVE_FABRIC_OBJECT, SET_COLORS,
     SET_OBSERVABLE
 } from './actionTypes'
-import {calcHypotenuse} from '../utils'
+import {calcHypotenuse, setColorByMaxRssi} from '../utils'
 
 const initialState: FabricState = {
     observable: null,
     bsmList: [],
     hypotenuse: 0,
     canvasDim: [0, 0],
-    selection: null
+    selection: null,
 }
 
 const reducer = (state: FabricState = initialState, action: FabricObjectAction): FabricState => {
@@ -43,6 +43,12 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
             return  {
                 ...state,
                 observable: action.observable
+            }
+        case SET_COLORS:
+            const modifiedBsmList = setColorByMaxRssi(state.bsmList)
+            return {
+                ...state,
+                bsmList: modifiedBsmList
             }
         default:
             return  state

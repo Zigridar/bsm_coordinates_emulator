@@ -18,6 +18,7 @@ type BSM = {
     object: fabric.Object
     rssi: number
     setRssi: (rssi: number) => void
+    setPrimaryColor: () => void
 }
 
 interface IObservable {

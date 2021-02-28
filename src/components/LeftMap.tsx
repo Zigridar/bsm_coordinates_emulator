@@ -6,7 +6,7 @@ import {nonZeroCoords, vectorModule} from '../utils'
 import {MAX_RSSI} from '../constants'
 import {fabric} from 'fabric'
 import {Dispatch} from 'redux'
-import {changeSelectionAction, setObservableAction} from '../redux/actionCreators'
+import {changeSelectionAction, setColorsAction, setObservableAction} from '../redux/actionCreators'
 import store from '../redux/store'
 
 interface OwnProps {
@@ -20,6 +20,7 @@ interface StateProps {
 interface DispatchProps {
     changeSelection: (object: fabric.Object) => void
     setObservable: (object: IObservable) => void
+    setColors: () => void
 }
 
 const mapStateToProps = (state: FabricState) => {
@@ -36,6 +37,9 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         },
         setObservable: (object: IObservable) => {
             dispatch(setObservableAction(object))
+        },
+        setColors: () => {
+            dispatch(setColorsAction())
         }
     }
     return props
@@ -82,6 +86,7 @@ const LeftMap: React.FC<LeftMapProps>= (props: LeftMapProps) => {
             const calc = MAX_RSSI * (1 - module / hyp)
             const rssi = calc >= 0 ? calc : 0
             bsm.setRssi(rssi)
+            props.setColors()
         })
     })
 

@@ -2,7 +2,7 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT,
+    REMOVE_FABRIC_OBJECT, SET_COLORS,
     SET_OBSERVABLE
 } from './actionTypes'
 import {fabric} from 'fabric'
@@ -43,6 +43,14 @@ export const setObservableAction = (object: IObservable) => {
     const action: FabricObjectAction = {
         type: SET_OBSERVABLE,
         observable: object
+    }
+
+    return action
+}
+
+export const setColorsAction = () => {
+    const action: FabricObjectAction = {
+        type: SET_COLORS
     }
 
     return action
