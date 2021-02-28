@@ -1,4 +1,3 @@
-import GeoZoneMapWithState from './GeoZoneMap'
 import React from 'react'
 import {connect} from 'react-redux'
 
@@ -32,7 +31,7 @@ type RightMapProps = OwnProps & StateProps & DispatchProps
 
 const RightMap: React.FC<RightMapProps>= (props: RightMapProps) => {
 
-    return(<GeoZoneMapWithState bsmList={[]} cardPadding={props.cardPadding}/>)
+    return(<div/>)
 }
 
 const RightMapWithState = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, mapDispatchToProps)(RightMap)

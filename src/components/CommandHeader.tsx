@@ -13,6 +13,7 @@ interface OwnProps {
 
 interface StateProps {
     selection: fabric.Object
+    observable: IObservable
 }
 
 interface DispatchProps {
@@ -22,7 +23,8 @@ interface DispatchProps {
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        selection: state.selection
+        selection: state.selection,
+        observable: state.observable
     }
     return props
 }
@@ -86,7 +88,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     danger={true}
                     shape={'circle'}
                     onClick={() => props.removeSelected(props.selection)}
-                    disabled={!props.selection}
+                    disabled={!props.selection || props.selection === props.observable.object}
                     icon={<DeleteOutlined/>}
                     size={"large"}
                 />

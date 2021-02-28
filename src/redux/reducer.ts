@@ -1,7 +1,14 @@
-import {ADD_FABRIC_OBJECT, CHANGE_CANVAS_DIM, CHANGE_SELECTION, MOVE_EVENT, REMOVE_FABRIC_OBJECT} from './actionTypes'
+import {
+    ADD_FABRIC_OBJECT,
+    CHANGE_CANVAS_DIM,
+    CHANGE_SELECTION,
+    REMOVE_FABRIC_OBJECT,
+    SET_OBSERVABLE
+} from './actionTypes'
 import {calcHypotenuse} from '../utils'
 
 const initialState: FabricState = {
+    observable: null,
     bsmList: [],
     hypotenuse: 0,
     canvasDim: [0, 0],
@@ -31,6 +38,11 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
             return {
                 ...state,
                 selection: action.selection
+            }
+        case SET_OBSERVABLE:
+            return  {
+                ...state,
+                observable: action.observable
             }
         default:
             return  state

@@ -1,4 +1,10 @@
-import {ADD_FABRIC_OBJECT, CHANGE_CANVAS_DIM, CHANGE_SELECTION, REMOVE_FABRIC_OBJECT} from './actionTypes'
+import {
+    ADD_FABRIC_OBJECT,
+    CHANGE_CANVAS_DIM,
+    CHANGE_SELECTION,
+    REMOVE_FABRIC_OBJECT,
+    SET_OBSERVABLE
+} from './actionTypes'
 import {fabric} from 'fabric'
 
 const actionCreator: (actionType: string) => (object: BSM) => FabricObjectAction = (actionType: string) => {
@@ -28,6 +34,15 @@ export const changeSelectionAction = (object: fabric.Object) => {
     const action: FabricObjectAction = {
         type: CHANGE_SELECTION,
         selection: object
+    }
+
+    return action
+}
+
+export const setObservableAction = (object: IObservable) => {
+    const action: FabricObjectAction = {
+        type: SET_OBSERVABLE,
+        observable: object
     }
 
     return action

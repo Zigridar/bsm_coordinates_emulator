@@ -1,18 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {fabric} from 'fabric'
 import {Canvas, IEvent} from 'fabric/fabric-impl'
-import {connect} from "react-redux";
-import {Dispatch} from "redux";
-import {changeCanvasDimAction} from "../redux/actionCreators";
+import {connect} from 'react-redux'
+import {Dispatch} from 'redux'
+import {changeCanvasDimAction} from '../redux/actionCreators'
 
 interface OwnProps {
     cardPadding: number
+    observable?: IObservable
     canvasHandlers?: [string, (event: IEvent) => void][]
     bsmList: BSM[]
 }
 
 interface StateProps {
-
+    observable: IObservable
 }
 
 interface DispatchProps {
@@ -21,7 +22,7 @@ interface DispatchProps {
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-
+        observable: state.observable
     }
 
     return props
@@ -113,7 +114,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
 
         const { canvasHandlers = [] } = props
-        
+
         /** add additional handlers */
         canvasHandlers.forEach((item: [string, (e: IEvent) => void]) => {
             newCanvas.on(...item)
@@ -135,6 +136,15 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         return (() => window.removeEventListener('resize', handleResize))
     }, [])
 
+    useEffect(() => {
+        if (props.observable) {
+            canvas.add(props.observable.object)
+            props.observable.object.center()
+            canvas.renderAll()
+            console.log('add obse')
+        }
+    }, [props.observable])
+
     /** refresh size **/
     useEffect(() => {
         if (canvas) {
@@ -150,10 +160,10 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             const newObjects = props.bsmList.map((item: BSM) => item.object)
             canvas.add(...newObjects)
             canvas.getObjects().forEach((item: fabric.Object) => {
-                if (!newObjects.some(newItem => newItem === item))
+                if ((item !== props.observable.object) && !newObjects.some(newItem => newItem === item))
                     canvas.remove(item)
             })
-            canvas.requestRenderAll()
+            canvas.renderAll()
         }
     })
 
