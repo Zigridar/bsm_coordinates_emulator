@@ -35,7 +35,11 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
             dispatch(addObjectAction(bsm))
         },
         removeSelected: (object: fabric.Object) => {
-            dispatch(removeObjectAction({object, setText: () => {}}))
+            dispatch(removeObjectAction({
+                object,
+                setRssi: () => {},
+                rssi: 0
+            }))
             dispatch(changeSelectionAction(null))
         }
     }
@@ -66,8 +70,10 @@ const createBsm: () => BSM = () => {
 
     return {
         object: group,
-        setText: (text: string) => {
-            textObject.set('text', text)
+        rssi: 0,
+        setRssi (rssi: number) {
+            this.rssi = rssi
+            textObject.set('text', `${rssi.toFixed(2)}`)
         }
     }
 }

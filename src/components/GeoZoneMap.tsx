@@ -9,11 +9,11 @@ interface OwnProps {
     cardPadding: number
     observable?: IObservable
     canvasHandlers?: [string, (event: IEvent) => void][]
-    bsmList: BSM[]
 }
 
 interface StateProps {
     observable: IObservable
+    bsmList: BSM[]
 }
 
 interface DispatchProps {
@@ -22,7 +22,8 @@ interface DispatchProps {
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        observable: state.observable
+        observable: state.observable,
+        bsmList: state.bsmList
     }
 
     return props

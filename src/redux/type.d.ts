@@ -16,7 +16,8 @@ type FabricObjectAction = {
 
 type BSM = {
     object: fabric.Object
-    setText: (text: string) => void
+    rssi: number
+    setRssi: (rssi: number) => void
 }
 
 interface IObservable {

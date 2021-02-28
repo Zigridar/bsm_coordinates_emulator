@@ -14,8 +14,7 @@ interface OwnProps {
 }
 
 interface StateProps {
-    bsmList: BSM[]
-    canvasDim: [number, number]
+
 }
 
 interface DispatchProps {
@@ -25,8 +24,7 @@ interface DispatchProps {
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        bsmList: state.bsmList,
-        canvasDim: state.canvasDim
+
     }
     return props
 }
@@ -83,7 +81,7 @@ const LeftMap: React.FC<LeftMapProps>= (props: LeftMapProps) => {
             const hyp = store.getState().hypotenuse
             const calc = MAX_RSSI * (1 - module / hyp)
             const rssi = calc >= 0 ? calc : 0
-            bsm.setText(`${rssi.toFixed(2)}`)
+            bsm.setRssi(rssi)
         })
     })
 
@@ -95,7 +93,7 @@ const LeftMap: React.FC<LeftMapProps>= (props: LeftMapProps) => {
         props.setObservable(newObservable)
     }, [])
 
-    return(<GeoZoneMapWithState bsmList={store.getState().bsmList} canvasHandlers={canvasHandlers} cardPadding={props.cardPadding}/>)
+    return(<GeoZoneMapWithState canvasHandlers={canvasHandlers} cardPadding={props.cardPadding}/>)
 }
 
 const LeftMapWithState = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, mapDispatchToProps)(LeftMap)
