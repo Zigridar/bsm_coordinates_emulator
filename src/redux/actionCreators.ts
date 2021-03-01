@@ -2,24 +2,28 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT, SET_COLORS,
+    REMOVE_FABRIC_OBJECT,
+    SET_COLORS,
     SET_OBSERVABLE
 } from './actionTypes'
 import {fabric} from 'fabric'
 
-const actionCreator: (actionType: string) => (object: BSM) => FabricObjectAction = (actionType: string) => {
-    return (object: BSM) => {
-        const action: FabricObjectAction = {
-            type: actionType,
-            object
-        }
-
-        return action
+export const addObjectAction: (object: BSM) => FabricObjectAction = (object: BSM) => {
+    const action: FabricObjectAction = {
+        type: ADD_FABRIC_OBJECT,
+        object
     }
+
+    return action
 }
 
-export const addObjectAction: (object: BSM) => FabricObjectAction = actionCreator(ADD_FABRIC_OBJECT)
-export const removeObjectAction: (object: BSM) => FabricObjectAction = actionCreator(REMOVE_FABRIC_OBJECT)
+export const removeObjectAction: (object: fabric.Object) => FabricObjectAction = (object: fabric.Object) => {
+    const action: FabricObjectAction = {
+        type: REMOVE_FABRIC_OBJECT,
+        removedObject: object
+    }
+    return action
+}
 
 export const changeCanvasDimAction = (canvasDim: [number, number]) => {
     const action: FabricObjectAction = {

@@ -10,6 +10,7 @@ type FabricObjectAction = {
     type: string
     observable?: IObservable
     object?: BSM
+    removedObject?: fabric.Object
     canvasDim?: [number, number]
     selection?: fabric.Object
 }

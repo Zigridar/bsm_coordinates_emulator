@@ -35,12 +35,7 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
             dispatch(addObjectAction(bsm))
         },
         removeSelected: (object: fabric.Object) => {
-            dispatch(removeObjectAction({
-                object,
-                setRssi: () => {}, //todo
-                setPrimaryColor: () => {}, //todo
-                rssi: 0
-            }))
+            dispatch(removeObjectAction(object))
             dispatch(changeSelectionAction(null))
         }
     }
