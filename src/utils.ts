@@ -19,19 +19,21 @@ export const nonZeroCoords = (point: Point) => {
     return new fabric.Point(x, y)
 }
 
+//todo set border
 const setColor = (object: fabric.Object, color: string) => {
     const _object = object as fabric.Group
     _object.getObjects()[0].set('fill', color)
 }
 
-//todo make it better (full shit)
 export const setColorByMaxRssi= (bsms: BSM[], take: number = 3) => {
     bsms.forEach((bsm: BSM) => setColor(bsm.object, '#ff6620'))
 
-    const sortedArr = _.sortBy<BSM>(bsms, [(bsm: BSM) => bsm.rssi])
-    _.takeRight<BSM>(sortedArr, take)
+    _(bsms)
+        .sortBy([(bsm: BSM) => bsm.rssi])
+        .takeRight(take)
         .forEach((bsm: BSM) => {
-            setColor(bsm.object,  '#44ff24')
+            setColor(bsm.object, '#44ff24')
         })
+
     return bsms
 }
