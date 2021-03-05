@@ -2,8 +2,8 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT,
-    SET_OBSERVABLE
+    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_MIN_TRIANGLE_AREA,
+    SET_OBSERVABLE, SET_RANDOM_ODD
 } from './actionTypes'
 import {calcAndDrawFantom, calcHypotenuse, nonZeroCoords, vectorModule} from '../utils'
 import {fabric} from 'fabric'
@@ -40,7 +40,13 @@ const initObservable = () => {
             const rssi = -relation * 50 - 50
 
             bsm.setRssi(rssi)
-            calcAndDrawFantom(store.getState().fantomPoint, store.getState().bsmList)
+            calcAndDrawFantom(
+                store.getState().fantomPoint,
+                store.getState().bsmList,
+                store.getState().randomOdd,
+                store.getState().minTriangleArea,
+                store.getState().fraction
+            )
         })
     })
 
@@ -58,6 +64,9 @@ const initialState: FabricState = {
     hypotenuse: 0,
     canvasDim: [0, 0],
     selection: null,
+    randomOdd: 1000,
+    minTriangleArea: 1,
+    fraction: 0.005
 }
 
 const reducer = (state: FabricState = initialState, action: FabricObjectAction): FabricState => {
@@ -88,6 +97,21 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
             return  {
                 ...state,
                 observable: action.observable
+            }
+        case SET_FRACTION:
+            return {
+                ...state,
+                fraction: action.numberValue
+            }
+        case SET_MIN_TRIANGLE_AREA:
+            return {
+                ...state,
+                minTriangleArea: action.numberValue
+            }
+        case SET_RANDOM_ODD:
+            return {
+                ...state,
+                randomOdd: action.numberValue
             }
         default:
             return  state

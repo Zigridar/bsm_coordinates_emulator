@@ -104,11 +104,11 @@ const triangleArea: (point_1: Point, point_2: Point, point_3: Point) => number =
 }
 
 /** Тройка рандомных коэффициентов (по убыванию)  */
-const sortedRandomOdds: () => number[] = () => {
+const sortedRandomOdds: (odd: number) => number[] = (odd: number) => {
     const sortedRandoms: number[] = _([Math.random(), Math.random(), Math.random()])
         .sort()
         .reverse()
-        .map(rand => rand * 1000)
+        .map(rand => rand * odd)
         .value()
     return sortedRandoms
 }
@@ -125,25 +125,24 @@ const pointByIntersection: (line_1: LineOdds, line_2: LineOdds) => Point = (line
     return new fabric.Point(x, y)
 }
 
-/** Минимальная площадь треугольника, до которого спускаемся рекурсивно */
-const MIN_TRIANGLE_AREA: number = 1 //todo
-
-//todo
-const FRACTION: number = 0.005
-
-const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: Vector, m: Vector) => Point = (
+const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: Vector, m: Vector, odd: number, minTriangleArea: number, fraction: number) => (Point) = (
     point_1: fabric.Point,
     point_2: fabric.Point,
     point_3: fabric.Point,
     l: Vector,
     k: Vector,
     m: Vector,
+    odd: number,
+    minTriangleArea: number,
+    fraction: number
 ) => {
     /** Площадь треугольника */
     const area = triangleArea(point_1, point_2, point_3)
     /** Если площадь треугольника меньше чем минимальна, то выходим из рекурсии */
-    if (area < MIN_TRIANGLE_AREA)
-        return point_1
+    if (area < minTriangleArea) {
+        const rand = Math.ceil(Math.random() * 10)
+        return rand < 3 ? point_1 : rand > 6 ? point_3 : point_2
+    }
     else {
 
         /** Уравнения прямых, образующих треугольник */
@@ -160,12 +159,12 @@ const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: 
         const nM = nearestPointOnTheLine(centerPoint, M)
 
         /** Рандомные коэффициенты */
-        const [k1, k2, k3] = sortedRandomOdds()
+        const [k1, k2, k3] = sortedRandomOdds(odd)
 
         /** Точки на отрезке до центра в отношении */
-        const fractionPointL = pointByFraction(nL, centerPoint, FRACTION * k3)
-        const fractionPointK = pointByFraction(nK, centerPoint, FRACTION * k1)
-        const fractionPointM = pointByFraction(nM, centerPoint, FRACTION * k2)
+        const fractionPointL = pointByFraction(nL, centerPoint, fraction * k3)
+        const fractionPointK = pointByFraction(nK, centerPoint, fraction * k1)
+        const fractionPointM = pointByFraction(nM, centerPoint, fraction * k2)
 
         const LL = lineEquationByPointAndVector(fractionPointL, l)
         const KK = lineEquationByPointAndVector(fractionPointK, k)
@@ -176,20 +175,27 @@ const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: 
         const point_2_2 = pointByIntersection(LL, KK)
         const point_3_3 = pointByIntersection(MM, KK)
 
-        //todo
         return findPoint(
             point_1_1,
             point_2_2,
             point_3_3,
             l,
             k,
-            m
+            m,
+            odd,
+            minTriangleArea,
+            fraction
         )
     }
 }
 
 /** Рандомный расчет координат */
-export const calcFakePosition: (bsms: BSM[]) => ([number, number]) = (bsms: BSM[]) => {
+export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => [number, number] = (
+    bsms: BSM[],
+    odd: number,
+    minTriangleArea: number,
+    fraction: number
+) => {
     const [bsm_1, bsm_2, bsm_3] = bsms
 
     /** Точки каждой БСМ */
@@ -202,14 +208,16 @@ export const calcFakePosition: (bsms: BSM[]) => ([number, number]) = (bsms: BSM[
     const k = directionVector(point_1, point_3)
     const m = directionVector(point_1, point_2)
 
-
     const point = findPoint(
         point_1,
         point_2,
         point_3,
         l,
         k,
-        m
+        m,
+        odd,
+        minTriangleArea,
+        fraction
     )
     return [point.x, point.y]
 }
@@ -221,8 +229,19 @@ export const setCoords = (object: fabric.Object, coords: [number, number]) => {
     object.bringToFront()
 }
 
-export const calcAndDrawFantom = (fantomObject: fabric.Object, bsms: BSM[]) => {
+export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => void = (
+    fantomObject: fabric.Object,
+    bsms: BSM[],
+    odd: number,
+    minTriangleArea: number,
+    fraction: number
+) => {
     const maxBsms = setColorByMaxRssi(bsms)
-    const coords = calcFakePosition(maxBsms)
+    const coords = calcFakePosition(
+        maxBsms,
+        odd,
+        minTriangleArea,
+        fraction
+    )
     setCoords(fantomObject, coords)
 }

@@ -5,6 +5,9 @@ type FabricState = {
     canvasDim: [number, number]
     hypotenuse: number
     selection: fabric.Object
+    randomOdd: number
+    minTriangleArea: number
+    fraction: number
 }
 
 type FabricObjectAction = {
@@ -13,7 +16,8 @@ type FabricObjectAction = {
     object?: BSM
     removedObject?: fabric.Object
     canvasDim?: [number, number]
-    selection?: fabric.Object
+    selection?: fabric.Object,
+    numberValue?: number
 }
 
 type BSM = {
