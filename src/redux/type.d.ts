@@ -1,4 +1,5 @@
 type FabricState = {
+    fantomPoint: fabric.Object
     observable: IObservable
     bsmList: BSM[]
     canvasDim: [number, number]
@@ -16,10 +17,10 @@ type FabricObjectAction = {
 }
 
 type BSM = {
+    geoZone: number
     object: fabric.Object
     rssi: number
     setRssi: (rssi: number) => void
-    setPrimaryColor: () => void
 }
 
 interface IObservable {

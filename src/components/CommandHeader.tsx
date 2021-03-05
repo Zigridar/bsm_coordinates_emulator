@@ -5,7 +5,8 @@ import {fabric} from 'fabric'
 import {Button, Space} from 'antd'
 import {Dispatch} from 'redux'
 import {addObjectAction, changeSelectionAction, removeObjectAction} from '../redux/actionCreators'
-import {DeleteOutlined, PlusOutlined} from '@ant-design/icons/lib'
+import {DeleteOutlined} from '@ant-design/icons/lib'
+import CreateBSMDialog from './CreateBSMDialog'
 
 interface OwnProps {
 
@@ -44,51 +45,12 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
 
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
-const createBsm: () => BSM = () => {
-    const circleObject = new fabric.Circle({
-        radius: 20,
-        originX: 'center',
-        originY: 'center',
-        fill: '#ff6620'
-    })
-
-    const textObject = new fabric.Text('', {
-        fontSize: 10,
-        originX: 'center',
-        originY: 'center'
-    })
-
-    const group = new fabric.Group([circleObject, textObject], {
-        hasControls: false,
-        left: 0,
-        top: 0
-    })
-
-    return {
-        object: group,
-        rssi: 0,
-        setRssi (rssi: number) {
-            this.rssi = rssi
-            textObject.set('text', `${rssi.toFixed(2)}`)
-        },
-        setPrimaryColor () {
-
-        }
-    }
-}
-
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
     return(
         <Header>
             <Space size={'middle'}>
-                <Button
-                    shape={'circle'}
-                    onClick={() => props.addBsmToCanvas(createBsm())}
-                    icon={<PlusOutlined/>}
-                    size={"large"}
-
-                />
+                <CreateBSMDialog addBsmToCanvas={props.addBsmToCanvas}/>
                 <Button
                     danger={true}
                     shape={'circle'}

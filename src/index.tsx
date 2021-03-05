@@ -6,8 +6,7 @@ import './css/FullHeight.css'
 import {Provider} from "react-redux"
 import store from "./redux/store"
 import CommandHeaderWithState from './components/CommandHeader'
-import LeftMapWithState from './components/LeftMap'
-import RightMapWithState from './components/RightMap'
+import GeoZoneMap from './components/GeoZoneMap'
 
 const { Footer, Content } = Layout
 
@@ -20,14 +19,9 @@ const App: React.FC = () => {
             <CommandHeaderWithState/>
             <Content  className='full-height' style={{padding: '10px'}}>
                 <Row gutter={16} className='full-height'>
-                    <Col span={12} className='full-height'>
+                    <Col span={24} className='full-height'>
                         <Card className='full-height' bodyStyle={{ padding: '0px' }} style={{ padding: `${cardPadding}px` }}>
-                            <LeftMapWithState cardPadding={cardPadding} />
-                        </Card>
-                    </Col>
-                    <Col span={12} className='full-height'>
-                        <Card className='full-height' bodyStyle={{ padding: '0px' }} style={{ padding: `${cardPadding}px` }}>
-                            <RightMapWithState cardPadding={cardPadding}/>
+                            <GeoZoneMap cardPadding={cardPadding} />
                         </Card>
                     </Col>
                 </Row>

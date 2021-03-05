@@ -3,27 +3,29 @@ import {fabric} from 'fabric'
 import {Canvas, IEvent} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
 import {Dispatch} from 'redux'
-import {changeCanvasDimAction} from '../redux/actionCreators'
+import {changeCanvasDimAction, changeSelectionAction, setObservableAction} from '../redux/actionCreators'
 
 interface OwnProps {
     cardPadding: number
-    observable?: IObservable
-    canvasHandlers?: [string, (event: IEvent) => void][]
 }
 
 interface StateProps {
+    bsmList: BSM[],
+    fantomPoint: fabric.Object
     observable: IObservable
-    bsmList: BSM[]
 }
 
 interface DispatchProps {
     changeDim: (dim: [number, number]) => void
+    changeSelection: (object: fabric.Object) => void
+    setObservable: (object: IObservable) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        observable: state.observable,
-        bsmList: state.bsmList
+        bsmList: state.bsmList,
+        fantomPoint: state.fantomPoint,
+        observable: state.observable
     }
 
     return props
@@ -33,6 +35,12 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
     const props: DispatchProps = {
         changeDim: (dim: [number, number]) => {
             dispatch(changeCanvasDimAction(dim))
+        },
+        changeSelection: (object: fabric.Object) => {
+            dispatch(changeSelectionAction(object))
+        },
+        setObservable: (object: IObservable) => {
+            dispatch(setObservableAction(object))
         }
     }
 
@@ -113,8 +121,26 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
         })
 
-
-        const { canvasHandlers = [] } = props
+        const canvasHandlers: Array<[string, (e: IEvent) => void]> = [
+            [
+                'selection:cleared',
+                () => {
+                    props.changeSelection(null)
+                }
+            ],
+            [
+                'selection:updated',
+                (e: IEvent & {selected: fabric.Object[]}) => {
+                    props.changeSelection(e.selected[0])
+                }
+            ],
+            [
+                'selection:created',
+                (e: IEvent & {selected: fabric.Object[]}) => {
+                    props.changeSelection(e.selected[0])
+                }
+            ]
+        ]
 
         /** add additional handlers */
         canvasHandlers.forEach((item: [string, (e: IEvent) => void]) => {
@@ -134,17 +160,14 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             ...initialDim
         })
 
+        newCanvas.add(props.fantomPoint)
+        props.fantomPoint.center()
+
+        newCanvas.add(props.observable.object)
+        props.observable.object.center()
+
         return (() => window.removeEventListener('resize', handleResize))
     }, [])
-
-    useEffect(() => {
-        if (props.observable) {
-            canvas.add(props.observable.object)
-            props.observable.object.center()
-            canvas.renderAll()
-            console.log('add obse')
-        }
-    }, [props.observable])
 
     /** refresh size **/
     useEffect(() => {
@@ -161,7 +184,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             const newObjects = props.bsmList.map((item: BSM) => item.object)
             canvas.add(...newObjects)
             canvas.getObjects().forEach((item: fabric.Object) => {
-                if ((item !== props.observable.object) && !newObjects.some(newItem => newItem === item))
+                if ((item !== props.observable.object && item !== props.fantomPoint) && !newObjects.some(newItem => newItem === item))
                     canvas.remove(item)
             })
             canvas.renderAll()
