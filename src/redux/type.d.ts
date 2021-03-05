@@ -4,7 +4,7 @@ type FabricState = {
     bsmList: BSM[]
     canvasDim: [number, number]
     hypotenuse: number
-    selection: fabric.Object
+    selection: IDeletableFabric
     randomOdd: number
     minTriangleArea: number
     fraction: number
@@ -22,7 +22,7 @@ type FabricObjectAction = {
 
 type BSM = {
     geoZone: number
-    object: fabric.Object
+    object: IDeletableFabric
     rssi: number
     setRssi: (rssi: number) => void
     getCoords: () => fabric.Point
@@ -30,4 +30,8 @@ type BSM = {
 
 interface IObservable {
     object: fabric.Object
+}
+
+type IDeletableFabric = fabric.Object & {
+    forDelete?: boolean
 }

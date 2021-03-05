@@ -26,7 +26,6 @@ const App: React.FC = () => {
                     </Col>
                 </Row>
             </Content>
-            <Footer style={{ textAlign: 'center' }}>©2021 Created by Max Safonenko</Footer>
         </Layout>
     )
 }

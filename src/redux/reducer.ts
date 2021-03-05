@@ -79,7 +79,12 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
         case REMOVE_FABRIC_OBJECT:
             return {
                 ...state,
-                bsmList: state.bsmList.filter((item: BSM) => item.object !== action.removedObject)
+                bsmList: state.bsmList.filter((item: BSM) => {
+                    const check = item.object !== action.removedObject
+                    if (!check)
+                        item.object.forDelete = true
+                    return check
+                })
             }
         case CHANGE_CANVAS_DIM:
             const hypotenuse = calcHypotenuse(...action.canvasDim)

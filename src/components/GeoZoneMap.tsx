@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {fabric} from 'fabric'
-import {Canvas, IEvent} from 'fabric/fabric-impl'
+import {Canvas, IEvent, ILineOptions} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
 import {Dispatch} from 'redux'
 import {changeCanvasDimAction, changeSelectionAction, setObservableAction} from '../redux/actionCreators'
@@ -46,6 +46,40 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
 
     return props
 }
+
+/** create canvas grid */
+ const createGrid = (canvas: fabric.Canvas) => {
+     const options = {
+         distance: 50,
+         width: canvas.width,
+         height: canvas.height
+     }
+
+     const lineOptions: ILineOptions = {
+        stroke: '#ebebeb',
+        strokeWidth: 1,
+        selectable: false,
+        hasBorders: false,
+        hasControls: false
+     }
+
+     const gridLen = options.width / options.distance
+
+     for (let i = 0; i < gridLen; i++) {
+         const distance = i * options.distance
+
+         const horizontal = new fabric.Line([distance, 0, distance, options.width], lineOptions)
+         const vertical = new fabric.Line([0, distance, options.width, distance], lineOptions)
+
+         if(i % 2 === 0) {
+             horizontal.set({stroke: '#cccccc'})
+             vertical.set({stroke: '#cccccc'})
+         }
+
+         canvas.add(horizontal)
+         canvas.add(vertical)
+     }
+ }
 
 /** own props interface */
 type GeoZoneMapProps = OwnProps & StateProps & DispatchProps
@@ -93,7 +127,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         const canvasDim = getDimensions()
 
         const newCanvas = new fabric.Canvas(CANVAS_ID, {
-            backgroundColor: '#CCC',
+            backgroundColor: '#fff',
             height: canvasDim.height,
             width: canvasDim.width,
             stopContextMenu: true,
@@ -166,6 +200,8 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         newCanvas.add(props.observable.object)
         props.observable.object.center()
 
+        createGrid(newCanvas)
+
         return (() => window.removeEventListener('resize', handleResize))
     }, [])
 
@@ -183,8 +219,8 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         if (canvas) {
             const newObjects = props.bsmList.map((item: BSM) => item.object)
             canvas.add(...newObjects)
-            canvas.getObjects().forEach((item: fabric.Object) => {
-                if ((item !== props.observable.object && item !== props.fantomPoint) && !newObjects.some(newItem => newItem === item))
+            canvas.getObjects().forEach((item: IDeletableFabric) => {
+                if (item.forDelete)
                     canvas.remove(item)
             })
             canvas.renderAll()
