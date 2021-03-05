@@ -31,7 +31,7 @@ const initObservable = () => {
 
     observableObject.on('moving', (e: IEvent) => {
         store.getState().bsmList.forEach((bsm: BSM) => {
-            const center = bsm.object.getCenterPoint()
+            const center = bsm.getCoords()
             const module = vectorModule(center, nonZeroCoords(e.pointer))
             const hyp = store.getState().hypotenuse
 

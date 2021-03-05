@@ -44,6 +44,9 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
         setRssi (rssi: number) {
             this.rssi = rssi
             textObject.set('text', `${rssi.toFixed(2)}`)
+        },
+        getCoords() {
+            return group.getCenterPoint()
         }
     }
 
@@ -55,7 +58,7 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     const [isModalVisible, setModalVisible] = useState<boolean>(false)
 
     const [dialogStorage, setDialogStorage] = useState<DialogStorage>({
-        bsmCount: 5,
+        bsmCount: 3,
         geoZone: 1,
         color: '#dc0808'
     })
@@ -106,7 +109,6 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                         <InputNumber
                             value={dialogStorage.geoZone}
                             min={1}
-                            max={5}
                             onChange={(value: number) => setDialogStorage(prev => ({...prev, geoZone: value}))}
                         />
                     </Form.Item>
@@ -117,7 +119,6 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                         <InputNumber
                             value={dialogStorage.bsmCount}
                             min={1}
-                            max={5}
                             onChange={(value: number) => setDialogStorage(prev => ({...prev, bsmCount: value}))}
                         />
                     </Form.Item>

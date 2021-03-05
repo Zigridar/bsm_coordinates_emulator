@@ -41,57 +41,177 @@ export const setColorByMaxRssi: (bsms: BSM[]) => BSM[] = (bsms: BSM[]) => {
     return result
 }
 
-//todo
-const RSSI0 = -50
+/** Координаты вектора на плоскости */
+type Vector = [number, number]
 
-export const tripleCasePoint: (bsms: BSM[]) => [number, number] = (bsms: BSM[]) => {
-    const [bsm1, bsm2, bsm3] = bsms
-    const point1 = bsm1.object.getCenterPoint()
-    const point2 = bsm2.object.getCenterPoint()
-    const point3 = bsm3.object.getCenterPoint()
+/** Коэффициенты уравнения прямой */
+type LineOdds = [number, number, number]
 
-    const r1 = 10 ** ((RSSI0 - bsm1.rssi) / 20)
-    const r2 = 10 ** ((RSSI0 - bsm2.rssi) / 20)
-    const r3 = 10 ** ((RSSI0 - bsm3.rssi) / 20)
-
-    const M1 = (point2.x - point1.x)
-    const M2 = (point3.x - point1.x)
-
-    const N1 = (point2.y - point1.y)
-    const N2 = (point3.y - point1.y)
-
-    const L1 = 0.5 * (r1 ** 2 - r2 ** 2 - point1.x ** 2 - point1.y ** 2 + point2.x ** 2 + point2.y ** 2)
-    const L2 = 0.5 * (r1 ** 2 - r3 ** 2 - point1.x ** 2 - point1.y ** 2 + point3.x ** 2 + point3.y ** 2)
-
-    const dD = M1 * N2 - M2 * N1
-
-    const x = (L1 * N2 - L2 * N1) / dD
-    const y = (M1 * L2 - M2 * L1) / dD
-
-    return [x, y]
+/** Вычисление вектора по двум точкам */
+const directionVector: (point_1: Point, point_2: Point) => Vector = (point_1: fabric.Point, point_2: fabric.Point) => {
+    return [point_2.x - point_1.x, point_2.y - point_1.y]
 }
 
-//todo
-export const doubleCasePoint: (bsms: BSM[]) => [number, number] = (bsms: BSM[]) => {
-    return [10, 10]
+/** Вычисляет точку пресечения медиан треугольника */
+const triangleCenter = (point_1: fabric.Point, point_2: fabric.Point, point_3: fabric.Point) => {
+    return new fabric.Point((point_1.x + point_2.x + point_3.x) / 3, (point_1.y + point_2.y + point_3.y) / 3)
 }
 
-//todo
-export const singleCasePoint: (bsms: BSM[]) => [number, number] = (bsms: BSM[]) => {
-    return [10, 10]
+/** Вычисление коэффициентов прямой по направляющему вектору и точке этой прямой */
+const lineEquationByPointAndVector: (point: Point, vector: Vector) => LineOdds = (point: fabric.Point, vector: Vector) => {
+    const x0 = point.x
+    const y0 = point.y
+
+    const [ax, ay] = vector
+
+    const a = ay
+    const b = -ax
+    const c = (ax * y0 - ay * x0)
+
+    return [a, b, c]
 }
 
-export const calcFantomPosition: (bsms: BSM[]) => ([number, number]) = (bsms: BSM[]) => {
-    switch (bsms.length) {
-        case 1:
-            return singleCasePoint(bsms)
-        case 2:
-            return doubleCasePoint(bsms)
-        case 3:
-            return tripleCasePoint(bsms)
-        default:
-            throw new Error('BSMs is empty')
+/** Ближайшая точка к данной на прямой */
+const nearestPointOnTheLine: (point: Point, line: LineOdds) => Point = (point: fabric.Point, line: LineOdds) => {
+    const [a, b, c] = line
+
+    const x0 = point.x
+    const y0 = point.y
+
+    const module = a ** 2 + b ** 2
+
+    const x = (b * (b * x0 - a * y0) - a * c) / module
+    const y = (a * (-b * x0 + a * y0) - b * c) / module
+
+    return new fabric.Point(x, y)
+}
+
+/** Возвращает точку делящую точку в отношении fraction */
+const pointByFraction: (point_1: Point, point_2: Point, fraction: number) => Point = (point_1: fabric.Point, point_2: fabric.Point, fraction: number) => {
+    const x = (point_1.x + fraction * point_2.x) / (1 + fraction)
+    const y = (point_1.y + fraction * point_2.y) / (1 + fraction)
+    return new fabric.Point(x, y)
+}
+
+/** Вычисление площади треугольника по трем точкам */
+const triangleArea: (point_1: Point, point_2: Point, point_3: Point) => number = (point_1: fabric.Point, point_2: fabric.Point, point_3: fabric.Point) => {
+    const [x1, y1] = [point_1.x, point_1.y]
+    const [x2, y2] = [point_2.x, point_2.y]
+    const [x3, y3] = [point_3.x, point_3.y]
+
+    const determinant = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
+    return Math.abs(determinant)
+}
+
+/** Тройка рандомных коэффициентов (по убыванию)  */
+const sortedRandomOdds: () => number[] = () => {
+    const sortedRandoms: number[] = _([Math.random(), Math.random(), Math.random()])
+        .sort()
+        .reverse()
+        .map(rand => rand * 1000)
+        .value()
+    return sortedRandoms
+}
+
+/** Точка по пересечению двух прямых */
+const pointByIntersection: (line_1: LineOdds, line_2: LineOdds) => Point = (line_1: LineOdds, line_2: LineOdds) => {
+    const [a1, b1, c1] = line_1
+    const [a2, b2, c2] = line_2
+
+    const determinant = (a1 * b2 - a2 * b1)
+
+    const x = (c2 * b1 - c1 * b2) / determinant
+    const y = (a2 * c1 - a1 * c2) / determinant
+    return new fabric.Point(x, y)
+}
+
+/** Минимальная площадь треугольника, до которого спускаемся рекурсивно */
+const MIN_TRIANGLE_AREA: number = 1 //todo
+
+//todo
+const FRACTION: number = 0.005
+
+const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: Vector, m: Vector) => Point = (
+    point_1: fabric.Point,
+    point_2: fabric.Point,
+    point_3: fabric.Point,
+    l: Vector,
+    k: Vector,
+    m: Vector,
+) => {
+    /** Площадь треугольника */
+    const area = triangleArea(point_1, point_2, point_3)
+    /** Если площадь треугольника меньше чем минимальна, то выходим из рекурсии */
+    if (area < MIN_TRIANGLE_AREA)
+        return point_1
+    else {
+
+        /** Уравнения прямых, образующих треугольник */
+        const L = lineEquationByPointAndVector(point_1, l) /** Противолежащая точка с минимальным RSSI */
+        const K = lineEquationByPointAndVector(point_2, k) /** Противолежащая точка с максимальным RSSI */
+        const M = lineEquationByPointAndVector(point_3, m) /** Противолежащая точка со средним RSSI */
+
+        /** Центр треугольника */
+        const centerPoint = triangleCenter(point_1, point_2, point_3)
+
+        /** Ближайшие точки от центра до стороны треугольника */
+        const nL = nearestPointOnTheLine(centerPoint, L)
+        const nK = nearestPointOnTheLine(centerPoint, K)
+        const nM = nearestPointOnTheLine(centerPoint, M)
+
+        /** Рандомные коэффициенты */
+        const [k1, k2, k3] = sortedRandomOdds()
+
+        /** Точки на отрезке до центра в отношении */
+        const fractionPointL = pointByFraction(nL, centerPoint, FRACTION * k3)
+        const fractionPointK = pointByFraction(nK, centerPoint, FRACTION * k1)
+        const fractionPointM = pointByFraction(nM, centerPoint, FRACTION * k2)
+
+        const LL = lineEquationByPointAndVector(fractionPointL, l)
+        const KK = lineEquationByPointAndVector(fractionPointK, k)
+        const MM = lineEquationByPointAndVector(fractionPointM, m)
+
+        /** Вершины нового треугольника */
+        const point_1_1 = pointByIntersection(MM, LL)
+        const point_2_2 = pointByIntersection(LL, KK)
+        const point_3_3 = pointByIntersection(MM, KK)
+
+        //todo
+        return findPoint(
+            point_1_1,
+            point_2_2,
+            point_3_3,
+            l,
+            k,
+            m
+        )
     }
+}
+
+/** Рандомный расчет координат */
+export const calcFakePosition: (bsms: BSM[]) => ([number, number]) = (bsms: BSM[]) => {
+    const [bsm_1, bsm_2, bsm_3] = bsms
+
+    /** Точки каждой БСМ */
+    const point_1 = bsm_1.getCoords()
+    const point_2 = bsm_2.getCoords()
+    const point_3 = bsm_3.getCoords()
+
+    /** Направляющие векторы сторон образованного треугольника */
+    const l = directionVector(point_2, point_3)
+    const k = directionVector(point_1, point_3)
+    const m = directionVector(point_1, point_2)
+
+
+    const point = findPoint(
+        point_1,
+        point_2,
+        point_3,
+        l,
+        k,
+        m
+    )
+    return [point.x, point.y]
 }
 
 export const setCoords = (object: fabric.Object, coords: [number, number]) => {
@@ -103,6 +223,6 @@ export const setCoords = (object: fabric.Object, coords: [number, number]) => {
 
 export const calcAndDrawFantom = (fantomObject: fabric.Object, bsms: BSM[]) => {
     const maxBsms = setColorByMaxRssi(bsms)
-    const coords = calcFantomPosition(maxBsms)
+    const coords = calcFakePosition(maxBsms)
     setCoords(fantomObject, coords)
 }

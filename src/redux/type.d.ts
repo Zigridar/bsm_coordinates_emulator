@@ -21,6 +21,7 @@ type BSM = {
     object: fabric.Object
     rssi: number
     setRssi: (rssi: number) => void
+    getCoords: () => fabric.Point
 }
 
 interface IObservable {
