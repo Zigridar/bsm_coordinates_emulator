@@ -9,6 +9,7 @@ type FabricState = {
     minTriangleArea: number
     fraction: number
     points: [fabric.Point, fabric.Point][]
+    isLearning: boolean
 }
 
 type FabricObjectAction = {
@@ -18,7 +19,8 @@ type FabricObjectAction = {
     removedObject?: fabric.Object
     canvasDim?: [number, number]
     selection?: fabric.Object,
-    numberValue?: number
+    numberValue?: number,
+    isLearning?: boolean
 }
 
 type BSM = {
@@ -27,6 +29,7 @@ type BSM = {
     rssi: number
     setRssi: (rssi: number) => void
     getCoords: () => fabric.Point
+    setSelectable: (selectable: boolean) => void
 }
 
 interface IObservable {

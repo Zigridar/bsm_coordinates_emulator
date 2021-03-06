@@ -1,6 +1,15 @@
 import {Point} from 'fabric/fabric-impl'
 import {fabric} from 'fabric'
 import * as _ from 'lodash'
+import {
+    LEARN_POINT_COUNT,
+    MAX_FRACTION,
+    MAX_RANDOM_ODD,
+    MAX_TRIANGLE_AREA,
+    MIN_FRACTION,
+    MIN_RANDOM_ODD,
+    MIN_TRIANGLE_AREA
+} from './constants'
 
 export const vectorModule = (point1: Point, point2: Point) => {
     const dx = point1.x - point2.x
@@ -24,21 +33,21 @@ const setStrokeWidth = (object: fabric.Object, width: number) => {
     _object.getObjects()[0].set('strokeWidth', width)
 }
 
-export const setColorByMaxRssi: (bsms: BSM[]) => BSM[] = (bsms: BSM[]) => {
-    bsms.forEach((bsm: BSM) => setStrokeWidth(bsm.object, 0))
-
-    const result: BSM[] = []
-
-    _(bsms)
-        .sortBy([(bsm: BSM) => bsm.rssi])
+export const collectMaxRssi: (bsms: BSM[]) => BSM[] = (bsms: BSM[]) => {
+    const maxBsms: BSM[] = _(bsms)
+        .sortBy((bsm: BSM) => bsm.rssi)
         .takeRight(3)
         .reverse()
-        .forEach((bsm: BSM) => {
-            setStrokeWidth(bsm.object, 3)
-            result.push(bsm)
-        })
+        .value()
 
-    return result
+    return maxBsms
+}
+
+export const setColorByMaxRssi: (bsms: BSM[], maxBsms: BSM[]) => void = (bsms: BSM[], maxBsms: BSM[]) => {
+    bsms.forEach((bsm: BSM) => setStrokeWidth(bsm.object, 0))
+    maxBsms.forEach((bsm: BSM) => {
+        setStrokeWidth(bsm.object, 3)
+    })
 }
 
 /** Координаты вектора на плоскости */
@@ -208,7 +217,7 @@ export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: numbe
     const k = directionVector(point_1, point_3)
     const m = directionVector(point_1, point_2)
 
-    const point = findPoint(
+    return findPoint(
         point_1,
         point_2,
         point_3,
@@ -219,7 +228,6 @@ export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: numbe
         minTriangleArea,
         fraction
     )
-    return point
 }
 
 export const setCoords = (object: fabric.Object, point: fabric.Point) => {
@@ -236,7 +244,8 @@ export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number,
     minTriangleArea: number,
     fraction: number
 ) => {
-    const maxBsms = setColorByMaxRssi(bsms)
+    const maxBsms = collectMaxRssi(bsms)
+    setColorByMaxRssi(bsms, maxBsms)
     const point = calcFakePosition(
         maxBsms,
         odd,
@@ -248,7 +257,7 @@ export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number,
 }
 
 export const calcErrors: (data: [Point, Point][]) => [number, number, number] = (data: [[fabric.Point, fabric.Point]]) => {
-    const [distanceErrorSum, xErrorSum, yErrorSum] = data
+    const calculatetByEach  = data
         .map((item: [fabric.Point, fabric.Point]) => {
             const [real, calculated] = item
             /** distance between real and calculated points */
@@ -263,7 +272,8 @@ export const calcErrors: (data: [Point, Point][]) => [number, number, number] = 
                 errorSquareY
             ]
         })
-        .reduce((prev: [number, number, number], curr: [number, number, number]) => {
+
+    const [distanceErrorSum, xErrorSum, yErrorSum] = calculatetByEach.length > 0? calculatetByEach.reduce((prev: [number, number, number], curr: [number, number, number]) => {
             const [distanceSum, errorSquareXSum, errorSquareYSum] = prev
             const [distance, errorSquareX, errorSquareY] = curr
 
@@ -272,11 +282,102 @@ export const calcErrors: (data: [Point, Point][]) => [number, number, number] = 
                 errorSquareXSum + errorSquareX,
                 errorSquareYSum + errorSquareY
             ]
-        })
+        }) : [Infinity, Infinity, Infinity]
 
     return [
         distanceErrorSum / data.length,
         Math.sqrt(xErrorSum / data.length),
         Math.sqrt(yErrorSum / data.length)
     ]
+}
+
+/** рандом в диапазоне */
+export const diapasonRandom = (min: number, max: number) => {
+    const rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand)
+}
+
+export const setBsmRssi = (
+    bsms: BSM[],
+    currentPoint: fabric.Point,
+    hypotenuse: number
+) => {
+    bsms.forEach((bsm: BSM) => {
+        const bsmPoint = bsm.getCoords()
+        const module = vectorModule(bsmPoint, nonZeroCoords(currentPoint))
+        const hyp = hypotenuse
+        const relation = module > hyp ? 0 : (module / hyp)
+        const rssi = -relation * 50 - 50
+        bsm.setRssi(rssi)
+    })
+}
+
+/** Поиск оптимальных коэффициентов для случайных величин (для каждого расположения БСМ свои коэффициенты!!!) */
+export const learn = (
+    bsms: BSM[],
+    width: number,
+    height: number,
+    hypotenuse: number
+) => {
+    return new Promise<[number, number, number]>((resolve) => {
+        console.log('start learning')
+
+        /** Хранит результат ошибке в качестве ключа и параметры в значении */
+        const resultMap: Map<number, [number, number, number]> = new Map<number, [number, number, number]>()
+
+        /** Итерация по отношениям сдвига к центру */
+        for (let fraction: number = MIN_FRACTION; fraction < MAX_FRACTION; fraction += 0.001) {
+            console.log(`fraction: ${fraction}`)
+            /** Итерция по коэффициентам рандома */
+            for (let randomOdd: number = MIN_RANDOM_ODD; randomOdd < MAX_RANDOM_ODD; randomOdd += 50) {
+                console.log(`randomOdd: ${randomOdd}`)
+                /** Итерация по площади треугольника */
+                for (let triangleArea: number = MIN_TRIANGLE_AREA; triangleArea < MAX_TRIANGLE_AREA; triangleArea += 50) {
+                    console.log(`triangleArea: ${triangleArea}`)
+
+                    /** Хранит результаты расчетов */
+                    const points: [fabric.Point, fabric.Point][] = []
+
+                    for (let i: number = 0; i < LEARN_POINT_COUNT; i++) {
+                        /** Создание координат точки */
+                        const realX = diapasonRandom(0, height)
+                        const realY = diapasonRandom(0, width)
+                        const realPoint = new fabric.Point(realX, realY)
+                        /** Установка RSSI в зависимости от realPoint*/
+                        setBsmRssi(
+                            bsms,
+                            realPoint,
+                            hypotenuse
+                        )
+
+                        /** 3 БСМ с максимальным RSSI */
+                        const maxBsms = collectMaxRssi(bsms)
+                        /** Вычисленная точка */
+                        const point = calcFakePosition(
+                            maxBsms,
+                            randomOdd,
+                            triangleArea,
+                            fraction
+                        )
+                        /** Сохранить результат */
+                        points.push([realPoint, point])
+                    }
+
+                    const [moduleError] = calcErrors(points)
+
+                    resultMap.set(moduleError, [fraction, randomOdd, triangleArea])
+                }
+            }
+        }
+
+        const arr: number[] = Array.from(resultMap.keys())
+
+        const min: number = _.min(arr)
+
+        const [fraction, randomOdd, triangleArea] = resultMap.get(min)
+
+        console.log(`fraction: ${fraction}, randomOdd: ${randomOdd}, triangleArea: ${triangleArea}`)
+
+        resolve([fraction, randomOdd, triangleArea])
+    })
 }

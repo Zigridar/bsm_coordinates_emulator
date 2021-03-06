@@ -2,7 +2,7 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_MIN_TRIANGLE_AREA,
+    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_LEARNING, SET_MIN_TRIANGLE_AREA,
     SET_OBSERVABLE, SET_RANDOM_ODD
 } from './actionTypes'
 import {fabric} from 'fabric'
@@ -73,6 +73,15 @@ export const setMinTriangleArea = (minArea: number) => {
     const action: FabricObjectAction = {
         type: SET_MIN_TRIANGLE_AREA,
         numberValue: minArea
+    }
+
+    return action
+}
+
+export const setLearningAction = (isLearning: boolean) => {
+    const action: FabricObjectAction = {
+        type: SET_LEARNING,
+        isLearning: isLearning
     }
 
     return action

@@ -2,10 +2,10 @@ import {
     ADD_FABRIC_OBJECT,
     CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_MIN_TRIANGLE_AREA,
+    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_LEARNING, SET_MIN_TRIANGLE_AREA,
     SET_OBSERVABLE, SET_RANDOM_ODD
 } from './actionTypes'
-import {calcAndDrawFantom, calcErrors, calcHypotenuse, nonZeroCoords, vectorModule} from '../utils'
+import {calcAndDrawFantom, calcErrors, calcHypotenuse, nonZeroCoords, setBsmRssi, vectorModule} from '../utils'
 import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
 import store from './store'
@@ -30,33 +30,28 @@ const initObservable = () => {
     })
 
     observableObject.on('moving', (e: IEvent) => {
-        store.getState().bsmList.forEach((bsm: BSM) => {
-            const bsmPoint = bsm.getCoords()
 
-            const module = vectorModule(bsmPoint, nonZeroCoords(e.pointer))
-            const hyp = store.getState().hypotenuse
+        setBsmRssi(
+            store.getState().bsmList,
+            e.pointer,
+            store.getState().hypotenuse
+        )
 
-            const relation = module > hyp ? 0 : (module / hyp)
+        const calculatedPoint = calcAndDrawFantom(
+            store.getState().fantomPoint,
+            store.getState().bsmList,
+            store.getState().randomOdd,
+            store.getState().minTriangleArea,
+            store.getState().fraction
+        )
 
-            const rssi = -relation * 50 - 50
+        store.getState().points.push([e.pointer, calculatedPoint])
 
-            bsm.setRssi(rssi)
-            const calculatedPoint = calcAndDrawFantom(
-                store.getState().fantomPoint,
-                store.getState().bsmList,
-                store.getState().randomOdd,
-                store.getState().minTriangleArea,
-                store.getState().fraction
-            )
-
-            store.getState().points.push([e.pointer, calculatedPoint])
-
-            if (store.getState().points.length % 100 === 0) {
-                const [moduleError, xError, yError] = calcErrors(store.getState().points)
-                //todo test
-                console.log(`moduleError: ${moduleError / 100}, xError: ${xError / 100}, yError: ${yError / 100}`)
-            }
-        })
+        if (store.getState().points.length % 100 === 0) {
+            const [moduleError, xError, yError] = calcErrors(store.getState().points)
+            //todo test
+            console.log(`moduleError: ${moduleError / 100}, xError: ${xError / 100}, yError: ${yError / 100}`)
+        }
     })
 
     const newObservable: IObservable = {
@@ -76,7 +71,8 @@ const initialState: FabricState = {
     randomOdd: 1000,
     minTriangleArea: 1,
     fraction: 0.005,
-    points: []
+    points: [],
+    isLearning: false
 }
 
 const reducer = (state: FabricState = initialState, action: FabricObjectAction): FabricState => {
@@ -127,6 +123,12 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
             return {
                 ...state,
                 randomOdd: action.numberValue
+            }
+        case SET_LEARNING:
+            state.bsmList.forEach((bsm: BSM) => bsm.setSelectable(!action.isLearning))
+            return {
+                ...state,
+                isLearning: action.isLearning
             }
         default:
             return  state

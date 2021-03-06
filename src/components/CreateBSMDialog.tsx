@@ -7,6 +7,7 @@ import {ColorResult, SketchPicker} from 'react-color'
 
 type CreateBSMDialogProps = {
     addBsmToCanvas: (bsm: BSM) => void
+    isLearning: boolean
 }
 
 type DialogStorage = {
@@ -47,6 +48,9 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
         },
         getCoords() {
             return group.getCenterPoint()
+        },
+        setSelectable(selectable: boolean) {
+            group.set('selectable', selectable)
         }
     }
 
@@ -83,6 +87,7 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     return(
         <>
             <Button
+                disabled={props.isLearning}
                 shape={'circle'}
                 onClick={() => setModalVisible(() => true)}
                 icon={<PlusOutlined/>}

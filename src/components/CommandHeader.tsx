@@ -8,12 +8,21 @@ import {
     addObjectAction,
     changeSelectionAction,
     removeObjectAction,
-    setFractionAction,
+    setFractionAction, setLearningAction,
     setMinTriangleArea,
     setRandomOdd
 } from '../redux/actionCreators'
-import {DeleteOutlined} from '@ant-design/icons/lib'
+import {DeleteOutlined, RiseOutlined} from '@ant-design/icons/lib'
 import CreateBSMDialog from './CreateBSMDialog'
+import {
+    MAX_FRACTION,
+    MAX_RANDOM_ODD,
+    MAX_TRIANGLE_AREA,
+    MIN_FRACTION,
+    MIN_RANDOM_ODD,
+    MIN_TRIANGLE_AREA
+} from '../constants'
+import {learn} from '../utils'
 
 interface OwnProps {
 
@@ -24,7 +33,11 @@ interface StateProps {
     observable: IObservable,
     randomOdd: number,
     minTriangleArea: number,
-    fraction: number
+    fraction: number,
+    bsms: BSM[],
+    canvasDim: [number, number]
+    hypotenuse: number,
+    isLearning: boolean
 }
 
 interface DispatchProps {
@@ -33,6 +46,7 @@ interface DispatchProps {
     setRandomOdd: (randomOdd: number) => void
     setMinTriangleArea: (minArea: number) => void
     setFraction: (fraction: number) => void
+    setLearning: (isLearning: boolean) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
@@ -41,7 +55,11 @@ const mapStateToProps = (state: FabricState) => {
         observable: state.observable,
         fraction: state.fraction,
         minTriangleArea: state.minTriangleArea,
-        randomOdd: state.randomOdd
+        randomOdd: state.randomOdd,
+        bsms: state.bsmList,
+        canvasDim: state.canvasDim,
+        hypotenuse: state.hypotenuse,
+        isLearning: state.isLearning
     }
     return props
 }
@@ -63,7 +81,10 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         },
         setMinTriangleArea: (minArea: number) => {
             dispatch(setMinTriangleArea(minArea))
-        }
+        },
+        setLearning: ((isLearning: boolean) => {
+            dispatch(setLearningAction(isLearning))
+        })
     }
     return props
 }
@@ -72,39 +93,67 @@ type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
+    const onLearn = async () => {
+        const [width, height] = props.canvasDim
+        props.setLearning(true)
+        learn(
+            props.bsms,
+            width,
+            height,
+            props.hypotenuse
+        )
+            .then((result: [number, number, number]) => {
+                props.setLearning(false)
+                const [fraction, randomOdd, triangleArea] = result
+                props.setFraction(fraction)
+                props.setRandomOdd(randomOdd)
+                props.setMinTriangleArea(triangleArea)
+            })
+    }
+
     return(
         <Header>
             <Space size={'middle'}>
-                <CreateBSMDialog addBsmToCanvas={props.addBsmToCanvas}/>
+                <CreateBSMDialog isLearning={props.isLearning} addBsmToCanvas={props.addBsmToCanvas}/>
                 <Button
                     danger={true}
                     shape={'circle'}
                     onClick={() => props.removeSelected(props.selection)}
-                    disabled={!props.selection || props.selection === props.observable.object}
+                    disabled={!props.selection || props.selection === props.observable.object || props.isLearning}
                     icon={<DeleteOutlined/>}
-                    size={"large"}
+                    size={'large'}
                 />
                 <Slider
+                    disabled={props.isLearning}
                     style={{width: '200px'}}
                     value={props.randomOdd}
                     onChange={props.setRandomOdd}
-                    min={10}
-                    max={10000}
+                    min={MIN_RANDOM_ODD}
+                    max={MAX_RANDOM_ODD}
                 />
                 <Slider
+                    disabled={props.isLearning}
                     style={{width: '200px'}}
                     value={props.fraction}
                     onChange={props.setFraction}
-                    min={0.0001}
-                    max={0.01}
+                    min={MIN_FRACTION}
+                    max={MAX_FRACTION}
                     step={0.0001}
                 />
                 <Slider
+                    disabled={props.isLearning}
                     style={{width: '200px'}}
                     value={props.minTriangleArea}
                     onChange={props.setMinTriangleArea}
-                    min={1}
-                    max={10000}
+                    min={MIN_TRIANGLE_AREA}
+                    max={MAX_TRIANGLE_AREA}
+                />
+                <Button
+                    disabled={props.isLearning}
+                    shape={'circle'}
+                    onClick={onLearn}
+                    icon={<RiseOutlined />}
+                    size={'large'}
                 />
             </Space>
         </Header>
