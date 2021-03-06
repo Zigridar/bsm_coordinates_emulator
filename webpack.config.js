@@ -9,7 +9,7 @@ module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './index.tsx',
+        main: './index.tsx'
     },
     stats: {
         children: true
@@ -66,8 +66,9 @@ module.exports = {
             },
             {
                 test: /\.worker\.ts$/,
-                exclude: /node_modules/,
-                use: { loader: 'worker-loader' }
+                use: {
+                    loader: 'worker-loader'
+                }
             },
             {
                 test: /\.tsx?$/,

@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import {fabric} from 'fabric'
 import {Button, Slider, Space} from 'antd'
 import {Dispatch} from 'redux'
+import LearnWorker from '../workers/LearnWorker'
 import {
     addObjectAction,
     changeSelectionAction,
@@ -22,6 +23,7 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from '../constants'
+import {simplifyBSM} from "../utils";
 
 interface OwnProps {
 
@@ -93,8 +95,24 @@ type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
     const onLearn = () => {
+        props.setLearning(true)
 
-        console.log('learn')
+        const worker = new LearnWorker()
+
+        const message: MessageFromMainThread = {
+            bsms: simplifyBSM(props.bsms),
+            width: props.canvasDim[0],
+            height: props.canvasDim[1],
+            hypotenuse: props.hypotenuse
+        }
+
+        worker.postMessage(message)
+
+        worker.onmessage = (event: MessageEvent<MessageFromLearnWorker>) => {
+            console.log(event.data)
+            worker.terminate()
+            props.setLearning(false)
+        }
     }
 
     return(

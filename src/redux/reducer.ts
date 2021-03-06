@@ -37,21 +37,13 @@ const initObservable = () => {
             store.getState().hypotenuse
         )
 
-        const calculatedPoint = calcAndDrawFantom(
+        calcAndDrawFantom(
             store.getState().fantomPoint,
             store.getState().bsmList,
             store.getState().randomOdd,
             store.getState().minTriangleArea,
             store.getState().fraction
         )
-
-        store.getState().points.push([e.pointer, calculatedPoint])
-
-        if (store.getState().points.length % 100 === 0) {
-            const [moduleError, xError, yError] = calcErrors(store.getState().points)
-            //todo test
-            console.log(`moduleError: ${moduleError / 100}, xError: ${xError / 100}, yError: ${yError / 100}`)
-        }
     })
 
     const newObservable: IObservable = {
@@ -71,7 +63,6 @@ const initialState: FabricState = {
     randomOdd: 1000,
     minTriangleArea: 1,
     fraction: 0.005,
-    points: [],
     isLearning: false
 }
 

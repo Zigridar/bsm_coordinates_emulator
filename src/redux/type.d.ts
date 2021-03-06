@@ -8,7 +8,6 @@ type FabricState = {
     randomOdd: number
     minTriangleArea: number
     fraction: number
-    points: [fabric.Point, fabric.Point][]
     isLearning: boolean
 }
 
@@ -23,14 +22,18 @@ type FabricObjectAction = {
     isLearning?: boolean
 }
 
-type BSM = {
+interface IBSM {
+    _rssi: number
     geoZone: number
-    object: IDeletableFabric
     rssi: number
-    setRssi: (rssi: number) => void
-    getCoords: () => fabric.Point
-    setSelectable: (selectable: boolean) => void
+    _staticCoords: IPoint
+    staticCoords: IPoint
 }
+
+type BSM = {
+    setSelectable: (selectable: boolean) => void
+    object: IDeletableFabric
+} & IBSM
 
 interface IObservable {
     object: fabric.Object
@@ -38,4 +41,21 @@ interface IObservable {
 
 type IDeletableFabric = fabric.Object & {
     forDelete?: boolean
+}
+
+type MessageFromMainThread = {
+    bsms: IBSM[]
+    width: number
+    height: number
+    hypotenuse: number
+}
+
+type MessageFromLearnWorker = {
+    result: [number, number, number]
+}
+
+/** Общий интерфейс, описывающий координаты точки */
+interface IPoint {
+    x: number
+    y: number
 }

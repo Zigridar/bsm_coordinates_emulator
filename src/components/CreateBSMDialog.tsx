@@ -39,18 +39,23 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
     })
 
     const newBsm: BSM = {
+        _rssi: 0,
         geoZone: geoZone,
         object: group,
-        rssi: 0,
-        setRssi (rssi: number) {
-            this.rssi = rssi
-            textObject.set('text', `${rssi.toFixed(2)}`)
-        },
-        getCoords() {
-            return group.getCenterPoint()
+        _staticCoords: group.getCenterPoint(),
+        get staticCoords() {
+            this._staticCoords = group.getCenterPoint()
+            return this._staticCoords
         },
         setSelectable(selectable: boolean) {
             group.set('selectable', selectable)
+        },
+        set rssi(value: number) {
+            this._rssi = value
+            textObject.set('text', `${value.toFixed(2)}`)
+        },
+        get rssi() {
+            return this._rssi
         }
     }
 

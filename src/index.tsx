@@ -10,17 +10,6 @@ import GeoZoneMap from './components/GeoZoneMap'
 
 const { Content } = Layout
 
-import MyWorker from "worker-loader!./workers/learn.worker"
-
-const worker = new MyWorker();
-
-worker.postMessage({ a: 1 });
-worker.onmessage = (event) => {
-    console.log(event)
-};
-
-worker.addEventListener("message", (event) => {});
-
 const App: React.FC = () => {
 
     const cardPadding: number = 15
