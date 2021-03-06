@@ -3,12 +3,23 @@ import React from 'react'
 import {Card, Col, Layout, Row} from 'antd'
 import 'antd/dist/antd.css'
 import './css/FullHeight.css'
-import {Provider} from "react-redux"
-import store from "./redux/store"
+import {Provider} from 'react-redux'
+import store from './redux/store'
 import CommandHeaderWithState from './components/CommandHeader'
 import GeoZoneMap from './components/GeoZoneMap'
 
-const { Footer, Content } = Layout
+const { Content } = Layout
+
+import MyWorker from "worker-loader!./workers/learn.worker"
+
+const worker = new MyWorker();
+
+worker.postMessage({ a: 1 });
+worker.onmessage = (event) => {
+    console.log(event)
+};
+
+worker.addEventListener("message", (event) => {});
 
 const App: React.FC = () => {
 

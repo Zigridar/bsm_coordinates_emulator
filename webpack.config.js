@@ -11,6 +11,9 @@ module.exports = {
     entry: {
         main: './index.tsx',
     },
+    stats: {
+        children: true
+    },
     devServer: {
         port: 3000
     },
@@ -60,6 +63,11 @@ module.exports = {
             {
                 test: /\.(woff|woff2|ttf|eot)$/,
                 use: ['file-loader']
+            },
+            {
+                test: /\.worker\.ts$/,
+                exclude: /node_modules/,
+                use: { loader: 'worker-loader' }
             },
             {
                 test: /\.tsx?$/,

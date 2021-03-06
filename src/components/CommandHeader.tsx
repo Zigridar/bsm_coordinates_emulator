@@ -22,7 +22,6 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from '../constants'
-import {learn} from '../utils'
 
 interface OwnProps {
 
@@ -93,22 +92,9 @@ type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
-    const onLearn = async () => {
-        const [width, height] = props.canvasDim
-        props.setLearning(true)
-        learn(
-            props.bsms,
-            width,
-            height,
-            props.hypotenuse
-        )
-            .then((result: [number, number, number]) => {
-                props.setLearning(false)
-                const [fraction, randomOdd, triangleArea] = result
-                props.setFraction(fraction)
-                props.setRandomOdd(randomOdd)
-                props.setMinTriangleArea(triangleArea)
-            })
+    const onLearn = () => {
+
+        console.log('learn')
     }
 
     return(
