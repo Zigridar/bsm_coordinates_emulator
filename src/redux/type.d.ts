@@ -8,6 +8,7 @@ type FabricState = {
     randomOdd: number
     minTriangleArea: number
     fraction: number
+    points: [fabric.Point, fabric.Point][]
 }
 
 type FabricObjectAction = {

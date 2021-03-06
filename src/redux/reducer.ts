@@ -5,7 +5,7 @@ import {
     REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_MIN_TRIANGLE_AREA,
     SET_OBSERVABLE, SET_RANDOM_ODD
 } from './actionTypes'
-import {calcAndDrawFantom, calcHypotenuse, nonZeroCoords, vectorModule} from '../utils'
+import {calcAndDrawFantom, calcErrors, calcHypotenuse, nonZeroCoords, vectorModule} from '../utils'
 import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
 import store from './store'
@@ -31,8 +31,9 @@ const initObservable = () => {
 
     observableObject.on('moving', (e: IEvent) => {
         store.getState().bsmList.forEach((bsm: BSM) => {
-            const center = bsm.getCoords()
-            const module = vectorModule(center, nonZeroCoords(e.pointer))
+            const bsmPoint = bsm.getCoords()
+
+            const module = vectorModule(bsmPoint, nonZeroCoords(e.pointer))
             const hyp = store.getState().hypotenuse
 
             const relation = module > hyp ? 0 : (module / hyp)
@@ -40,13 +41,21 @@ const initObservable = () => {
             const rssi = -relation * 50 - 50
 
             bsm.setRssi(rssi)
-            calcAndDrawFantom(
+            const calculatedPoint = calcAndDrawFantom(
                 store.getState().fantomPoint,
                 store.getState().bsmList,
                 store.getState().randomOdd,
                 store.getState().minTriangleArea,
                 store.getState().fraction
             )
+
+            store.getState().points.push([e.pointer, calculatedPoint])
+
+            if (store.getState().points.length % 100 === 0) {
+                const [moduleError, xError, yError] = calcErrors(store.getState().points)
+                //todo test
+                console.log(`moduleError: ${moduleError / 100}, xError: ${xError / 100}, yError: ${yError / 100}`)
+            }
         })
     })
 
@@ -66,7 +75,8 @@ const initialState: FabricState = {
     selection: null,
     randomOdd: 1000,
     minTriangleArea: 1,
-    fraction: 0.005
+    fraction: 0.005,
+    points: []
 }
 
 const reducer = (state: FabricState = initialState, action: FabricObjectAction): FabricState => {

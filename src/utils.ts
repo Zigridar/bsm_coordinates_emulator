@@ -190,7 +190,7 @@ const findPoint: (point_1: Point, point_2: Point, point_3: Point, l: Vector, k: 
 }
 
 /** Рандомный расчет координат */
-export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => [number, number] = (
+export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => fabric.Point = (
     bsms: BSM[],
     odd: number,
     minTriangleArea: number,
@@ -219,17 +219,17 @@ export const calcFakePosition: (bsms: BSM[], odd: number, minTriangleArea: numbe
         minTriangleArea,
         fraction
     )
-    return [point.x, point.y]
+    return point
 }
 
-export const setCoords = (object: fabric.Object, coords: [number, number]) => {
-    const [x, y] = coords
+export const setCoords = (object: fabric.Object, point: fabric.Point) => {
+    const [x, y] = [point.x, point.y]
     object.left = x + object.width / 2
     object.top = y + object.height / 2
     object.bringToFront()
 }
 
-export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => void = (
+export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number, minTriangleArea: number, fraction: number) => fabric.Point = (
     fantomObject: fabric.Object,
     bsms: BSM[],
     odd: number,
@@ -237,11 +237,46 @@ export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number,
     fraction: number
 ) => {
     const maxBsms = setColorByMaxRssi(bsms)
-    const coords = calcFakePosition(
+    const point = calcFakePosition(
         maxBsms,
         odd,
         minTriangleArea,
         fraction
     )
-    setCoords(fantomObject, coords)
+    setCoords(fantomObject, point)
+    return point
+}
+
+export const calcErrors: (data: [Point, Point][]) => [number, number, number] = (data: [[fabric.Point, fabric.Point]]) => {
+    const [distanceErrorSum, xErrorSum, yErrorSum] = data
+        .map((item: [fabric.Point, fabric.Point]) => {
+            const [real, calculated] = item
+            /** distance between real and calculated points */
+            const distance = vectorModule(real, calculated)
+
+            const errorSquareX = (real.x - calculated.x) ** 2
+            const errorSquareY = (real.y - calculated.y) ** 2
+
+            return [
+                distance,
+                errorSquareX,
+                errorSquareY
+            ]
+        })
+        .reduce((prev: [number, number, number], curr: [number, number, number]) => {
+            const [distanceSum, errorSquareXSum, errorSquareYSum] = prev
+            const [distance, errorSquareX, errorSquareY] = curr
+
+            return [
+                distanceSum + distance,
+                errorSquareXSum + errorSquareX,
+                errorSquareYSum + errorSquareY
+            ]
+        })
+
+    return [
+        distanceErrorSum / data.length,
+        Math.sqrt(xErrorSum / data.length),
+        Math.sqrt(yErrorSum / data.length)
+    ]
 }
