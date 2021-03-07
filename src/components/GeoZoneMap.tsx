@@ -209,6 +209,10 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             props.setVPT(newCanvas.vptCoords)
         })
 
+        newCanvas.on('after:render', () => {
+            props.setVPT(newCanvas.vptCoords)
+        })
+
         const canvasHandlers: Array<[string, (e: IEvent) => void]> = [
             [
                 'selection:cleared',

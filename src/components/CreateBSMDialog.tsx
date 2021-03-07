@@ -112,7 +112,6 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                 visible={isModalVisible}
             >
                 <Form
-
                     layout={'horizontal'}
                     labelCol={{span: 5}}
                     wrapperCol={{span: 5}}

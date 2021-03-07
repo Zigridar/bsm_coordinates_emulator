@@ -1,20 +1,18 @@
 import {Header} from 'antd/es/layout/layout'
-import React, {useState} from 'react'
+import React from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
 import {Button, Slider, Space} from 'antd'
 import {Dispatch} from 'redux'
-import LearnWorker from '../workers/LearnWorker'
 import {
     addObjectAction,
     changeSelectionAction,
     removeObjectAction,
     setFractionAction,
-    setLearningAction,
     setMinTriangleArea,
     setRandomOdd
 } from '../redux/actionCreators'
-import {DeleteOutlined, RiseOutlined} from '@ant-design/icons/lib'
+import {DeleteOutlined} from '@ant-design/icons/lib'
 import CreateBSMDialog from './CreateBSMDialog'
 import {
     MAX_FRACTION,
@@ -24,8 +22,7 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from '../constants'
-import {simplifyBSM} from '../utils'
-import {LEARN_RESULT, PROGRESS, START_LEARNING} from "../workers/WorkerMessageTypes";
+import LearningDialog from "./StartLearnDialog";
 
 interface OwnProps {
 
@@ -37,9 +34,7 @@ interface StateProps {
     randomOdd: number,
     minTriangleArea: number,
     fraction: number,
-    bsms: BSM[],
-    isLearning: boolean,
-    vptCoords: VptCoords
+    isLearning: boolean
 }
 
 interface DispatchProps {
@@ -48,7 +43,6 @@ interface DispatchProps {
     setRandomOdd: (randomOdd: number) => void
     setMinTriangleArea: (minArea: number) => void
     setFraction: (fraction: number) => void
-    setLearning: (isLearning: boolean) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
@@ -58,9 +52,7 @@ const mapStateToProps = (state: FabricState) => {
         fraction: state.fraction,
         minTriangleArea: state.minTriangleArea,
         randomOdd: state.randomOdd,
-        bsms: state.bsmList,
-        isLearning: state.isLearning,
-        vptCoords: state.vptCoords
+        isLearning: state.isLearning
     }
     return props
 }
@@ -82,9 +74,6 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         },
         setMinTriangleArea: (minArea: number) => {
             dispatch(setMinTriangleArea(minArea))
-        },
-        setLearning: (isLearning: boolean) => {
-            dispatch(setLearningAction(isLearning))
         }
     }
     return props
@@ -93,64 +82,6 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
-
-    const [progressCounter, setProgress] = useState<number>(0)
-
-    const onLearn = () => {
-        props.setLearning(true)
-
-        const learnWorker = new LearnWorker()
-
-        //todo set manually
-        const steps: LearnSteps = {
-            learnPointCount: 1000,
-            triangleAreaStep: 100,
-            randomOddStep: 1000,
-            fractionStep: 0.005
-        }
-
-        const minX = props.vptCoords.tl.x
-        const maxX = props.vptCoords.tr.x
-        const minY = props.vptCoords.tl.y
-        const maxY = props.vptCoords.bl.y
-
-
-        const message: MessageFromMainThread = {
-            maxX,
-            maxY,
-            minX,
-            minY,
-            type: START_LEARNING,
-            bsms: simplifyBSM(props.bsms),
-            steps
-        }
-
-        learnWorker.postMessage(message)
-
-        learnWorker.onmessage = (event: MessageEvent<MessageFromLearnWorker>) => {
-            const { result, progress, type } = event.data
-
-            switch (type) {
-                case PROGRESS:
-                    setProgress(() => progress * 100)
-                    break
-                case LEARN_RESULT:
-                    const [fraction, randomOdd, triangleArea] = result
-                    console.log(`learn result: fraction: ${fraction}, randomOdd: ${randomOdd}, triangleArea: ${triangleArea}`)
-                    learnWorker.terminate()
-                    props.setLearning(false)
-                    /** Установить вычиселнные коэффициенты */
-                    props.setFraction(fraction)
-                    props.setRandomOdd(randomOdd)
-                    props.setMinTriangleArea(triangleArea)
-                    break
-            }
-        }
-
-        learnWorker.onerror = (e) => {
-            console.log(e)
-        }
-    }
 
     return(
         <Header>
@@ -189,15 +120,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     min={MIN_TRIANGLE_AREA}
                     max={MAX_TRIANGLE_AREA}
                 />
-                <Button
-                    disabled={props.isLearning}
-                    shape={'circle'}
-                    onClick={onLearn}
-                    icon={!props.isLearning && <RiseOutlined />}
-                    size={'large'}
-                >
-                    {props.isLearning && <p>{`${Math.ceil(progressCounter)} %`}</p>}
-                </Button>
+                <LearningDialog/>
             </Space>
         </Header>
     )
