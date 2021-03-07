@@ -8,22 +8,23 @@ import {ColorResult, SketchPicker} from 'react-color'
 type CreateBSMDialogProps = {
     addBsmToCanvas: (bsm: BSM) => void
     isLearning: boolean
+    bsmList: BSM[]
 }
 
 type DialogStorage = {
-    bsmCount: number
-    geoZone: number
+    imei: number
     color: string
+    point: IPoint
 }
 
-const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, color: string) => {
+const createBsm: (imei: number, color: string, point: IPoint) => BSM = (imei: number, color: string, point: IPoint) => {
     const circleObject = new fabric.Circle({
         radius: 20,
         originX: 'center',
         originY: 'center',
         fill: color,
         stroke: '#6def0b',
-        strokeWidth: 3,
+        strokeWidth: 3
     })
 
     const textObject = new fabric.Text('', {
@@ -34,9 +35,13 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
 
     const group = new fabric.Group([circleObject, textObject], {
         hasControls: false,
-        left: 0,
-        top: 0
+        left: point.x * 100 - 21.5,
+        top: point.y * 100 - 21.5
     })
+
+    const center = group.getCenterPoint()
+
+    textObject.set({ text: `${(center.x / 100).toFixed(2)}, ${(center.y / 100).toFixed(2)}`})
 
     group.on('moving', () => {
         const point = group.getCenterPoint()
@@ -45,8 +50,10 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
     })
 
     const newBsm: BSM = {
+        rssi0: 50,
+        r0: 1,
         _rssi: 0,
-        geoZone: geoZone,
+        imei: imei,
         object: group,
         _staticCoords: group.getCenterPoint(),
         get staticCoords() {
@@ -54,7 +61,7 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
             return this._staticCoords
         },
         setSelectable(selectable: boolean) {
-            group.set('selectable', selectable)
+            group.set({ selectable })
         },
         set rssi(value: number) {
             this._rssi = value
@@ -72,18 +79,23 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     const [isModalVisible, setModalVisible] = useState<boolean>(false)
 
     const [dialogStorage, setDialogStorage] = useState<DialogStorage>({
-        bsmCount: 3,
-        geoZone: 1,
-        color: '#dc0808'
+        imei: 1,
+        color: '#dc0808',
+        point: { x: 0, y: 0 }
     })
 
     const onCancel: () => void = () => setModalVisible(() => false)
 
-    const onOk: (geoZone: number, count: number) => void = () => {
-        setModalVisible(() => false)
-
-        for (let i: number = 0; i < dialogStorage.bsmCount; i++) {
-            props.addBsmToCanvas(createBsm(dialogStorage.geoZone, dialogStorage.color))
+    const onOk: () => void = () => {
+        if (!props.bsmList.find((bsm: BSM) => bsm.imei === dialogStorage.imei)) {
+            setModalVisible(() => false)
+            props.addBsmToCanvas(createBsm(dialogStorage.imei, dialogStorage.color, dialogStorage.point))
+        }
+        else {
+            Modal.error({
+                title: 'Ошибка',
+                content: `БСМ с imei ${dialogStorage.imei} уже существует`,
+            })
         }
     }
 
@@ -107,7 +119,7 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
             <Modal
                 centered={true}
                 title={'Create bsm'}
-                onOk={() => onOk(dialogStorage.geoZone, dialogStorage.bsmCount)}
+                onOk={onOk}
                 onCancel={onCancel}
                 visible={isModalVisible}
             >
@@ -118,22 +130,24 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                 >
                     <Form.Item
                         required={true}
-                        label={'geo zone'}
+                        label='IMEI'
                     >
                         <InputNumber
-                            value={dialogStorage.geoZone}
+                            value={dialogStorage.imei}
                             min={1}
-                            onChange={(value: number) => setDialogStorage(prev => ({...prev, geoZone: value}))}
+                            onChange={(value: number) => setDialogStorage(prev => ({...prev, imei: value}))}
                         />
                     </Form.Item>
                     <Form.Item
-                        required={true}
-                        label={'count'}
+                        label='Координаты'
                     >
                         <InputNumber
-                            value={dialogStorage.bsmCount}
-                            min={1}
-                            onChange={(value: number) => setDialogStorage(prev => ({...prev, bsmCount: value}))}
+                            value={dialogStorage.point.x}
+                            onChange={(x: number) => setDialogStorage(prev => ({...prev, point: {...prev.point, x}}))}
+                        />
+                        <InputNumber
+                            value={dialogStorage.point.y}
+                            onChange={(y: number) => setDialogStorage(prev => ({...prev, point: {...prev.point, y}}))}
                         />
                     </Form.Item>
                     <Form.Item

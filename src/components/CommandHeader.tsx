@@ -36,6 +36,7 @@ interface StateProps {
     fraction: number
     isLearning: boolean
     errors: [number, number, number]
+    bsmList: BSM[]
 }
 
 interface DispatchProps {
@@ -54,7 +55,8 @@ const mapStateToProps = (state: FabricState) => {
         minTriangleArea: state.minTriangleArea,
         randomOdd: state.randomOdd,
         isLearning: state.isLearning,
-        errors: state.errors
+        errors: state.errors,
+        bsmList: state.bsmList
     }
     return props
 }
@@ -90,7 +92,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
     return(
         <Header>
             <Space size={'middle'}>
-                <CreateBSMDialog isLearning={props.isLearning} addBsmToCanvas={props.addBsmToCanvas}/>
+                <CreateBSMDialog isLearning={props.isLearning} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}

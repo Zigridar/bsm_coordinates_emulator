@@ -25,7 +25,7 @@ type FabricObjectAction = {
 
 interface IBSM {
     _rssi: number
-    geoZone: number
+    imei: number
     rssi: number
     _staticCoords: IPoint
     staticCoords: IPoint
@@ -34,6 +34,8 @@ interface IBSM {
 type BSM = {
     setSelectable: (selectable: boolean) => void
     object: IDeletableFabric
+    rssi0: number
+    r0: number
 } & IBSM
 
 interface IObservable {

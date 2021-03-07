@@ -423,7 +423,7 @@ export const simplifyBSM: (bsms: BSM[]) => IBSM[] = (bsms: BSM[]) => {
             _rssi: bsm._rssi,
             staticCoords: bsm.staticCoords,
             _staticCoords: bsm._staticCoords,
-            geoZone: bsm.geoZone
+            imei: bsm.imei
         }
         return simpleBSM
     })
