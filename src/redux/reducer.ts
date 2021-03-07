@@ -9,10 +9,11 @@ import {
     SET_RANDOM_ODD,
     SET_VPT
 } from './actionTypes'
-import {calcAndDrawFantom, setBsmRssi} from '../utils'
+import {calcAndDrawFantom, calcErrors, setBsmRssi} from '../utils'
 import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
 import store from './store'
+import {STATIST_POINT_COUNT} from "../constants";
 
 const initFantomPoint: () => fabric.Object = () => {
     const pseudoPoint = new fabric.Circle({
@@ -40,14 +41,22 @@ const initObservable = () => {
             e.pointer
         )
 
-        if (store.getState().bsmList.length > 0)
-            calcAndDrawFantom(
+        if (store.getState().bsmList.length > 0) {
+            const calculatedPoint = calcAndDrawFantom(
                 store.getState().fantomPoint,
                 store.getState().bsmList,
                 store.getState().randomOdd,
                 store.getState().minTriangleArea,
                 store.getState().fraction
             )
+            const pointArr = store.getState().statisticPoints
+            if (pointArr.length < STATIST_POINT_COUNT)
+                pointArr.push([e.pointer, calculatedPoint])
+            else {
+                store.getState().errors = calcErrors(pointArr)
+                store.getState().statisticPoints = []
+            }
+        }
         else
             console.log('Нет БСМ')
     })
@@ -60,6 +69,8 @@ const initObservable = () => {
 }
 
 const initialState: FabricState = {
+    errors: [0, 0, 0],
+    statisticPoints: [],
     vptCoords: undefined,
     fantomPoint: initFantomPoint(),
     observable: initObservable(),

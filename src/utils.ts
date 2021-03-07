@@ -270,7 +270,7 @@ export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number,
 }
 
 export const calcErrors: (data: [IPoint, IPoint][]) => [number, number, number] = (data: [[IPoint, IPoint]]) => {
-    const calculatetByEach  = data
+    const calculatedByEach = data
         .map((item: [IPoint, IPoint]) => {
             const [real, calculated] = item
             /** distance between real and calculated points */
@@ -286,7 +286,7 @@ export const calcErrors: (data: [IPoint, IPoint][]) => [number, number, number] 
             ]
         })
 
-    const [distanceErrorSum, xErrorSum, yErrorSum] = calculatetByEach.length > 0? calculatetByEach.reduce((prev: [number, number, number], curr: [number, number, number]) => {
+    const [distanceErrorSum, xErrorSum, yErrorSum] = calculatedByEach.length > 0? calculatedByEach.reduce((prev: [number, number, number], curr: [number, number, number]) => {
             const [distanceSum, errorSquareXSum, errorSquareYSum] = prev
             const [distance, errorSquareX, errorSquareY] = curr
 

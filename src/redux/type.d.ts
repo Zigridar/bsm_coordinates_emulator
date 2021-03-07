@@ -8,6 +8,8 @@ type FabricState = {
     minTriangleArea: number
     fraction: number
     isLearning: boolean
+    statisticPoints: [IPoint, IPoint][]
+    errors: [number, number, number]
 }
 
 type FabricObjectAction = {
