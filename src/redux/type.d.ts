@@ -44,18 +44,29 @@ type IDeletableFabric = fabric.Object & {
 }
 
 type MessageFromMainThread = {
+    type: string
     bsms: IBSM[]
     width: number
     height: number
     hypotenuse: number
+    steps: LearnSteps
 }
 
 type MessageFromLearnWorker = {
-    result: [number, number, number]
+    type: string
+    progress?: number
+    result?: [number, number, number]
 }
 
 /** Общий интерфейс, описывающий координаты точки */
 interface IPoint {
     x: number
     y: number
+}
+
+type LearnSteps = {
+    fractionStep: number
+    triangleAreaStep: number
+    randomOddStep: number
+    learnPointCount: number
 }

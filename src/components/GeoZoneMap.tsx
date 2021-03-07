@@ -181,7 +181,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             newCanvas.on(...item)
         })
 
-        //todo test
         setCanvas(() => newCanvas)
 
 
@@ -189,7 +188,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
         props.changeDim([initialDim.width, initialDim.height])
 
-        //todo test
         setDimensions({
             ...initialDim
         })

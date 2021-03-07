@@ -1,5 +1,5 @@
 import {Header} from 'antd/es/layout/layout'
-import React from 'react'
+import React, {useState} from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
 import {Button, Slider, Space} from 'antd'
@@ -9,7 +9,8 @@ import {
     addObjectAction,
     changeSelectionAction,
     removeObjectAction,
-    setFractionAction, setLearningAction,
+    setFractionAction,
+    setLearningAction,
     setMinTriangleArea,
     setRandomOdd
 } from '../redux/actionCreators'
@@ -23,7 +24,8 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from '../constants'
-import {simplifyBSM} from "../utils";
+import {simplifyBSM} from '../utils'
+import {LEARN_RESULT, PROGRESS, START_LEARNING} from "../workers/WorkerMessageTypes";
 
 interface OwnProps {
 
@@ -94,24 +96,56 @@ type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
+    const [progressCounter, setProgress] = useState<number>(0)
+
     const onLearn = () => {
         props.setLearning(true)
 
-        const worker = new LearnWorker()
+        const learnWorker = new LearnWorker()
 
-        const message: MessageFromMainThread = {
-            bsms: simplifyBSM(props.bsms),
-            width: props.canvasDim[0],
-            height: props.canvasDim[1],
-            hypotenuse: props.hypotenuse
+        const [width, height] = props.canvasDim
+
+        //todo set manually
+        const steps: LearnSteps = {
+            learnPointCount: 1000,
+            triangleAreaStep: 100,
+            randomOddStep: 1000,
+            fractionStep: 0.005
         }
 
-        worker.postMessage(message)
+        const message: MessageFromMainThread = {
+            type: START_LEARNING,
+            bsms: simplifyBSM(props.bsms),
+            width: width,
+            height: height,
+            hypotenuse: props.hypotenuse,
+            steps
+        }
 
-        worker.onmessage = (event: MessageEvent<MessageFromLearnWorker>) => {
-            console.log(event.data)
-            worker.terminate()
-            props.setLearning(false)
+        learnWorker.postMessage(message)
+
+        learnWorker.onmessage = (event: MessageEvent<MessageFromLearnWorker>) => {
+            const { result, progress, type } = event.data
+
+            switch (type) {
+                case PROGRESS:
+                    setProgress(() => progress * 100)
+                    break
+                case LEARN_RESULT:
+                    const [fraction, randomOdd, triangleArea] = result
+                    console.log(`learn result: fraction: ${fraction}, randomOdd: ${randomOdd}, triangleArea: ${triangleArea}`)
+                    learnWorker.terminate()
+                    props.setLearning(false)
+                    /** Установить вычиселнные коэффициенты */
+                    props.setFraction(fraction)
+                    props.setRandomOdd(randomOdd)
+                    props.setMinTriangleArea(triangleArea)
+                    break
+            }
+        }
+
+        learnWorker.onerror = (e) => {
+            console.log(e)
         }
     }
 
@@ -156,9 +190,11 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     disabled={props.isLearning}
                     shape={'circle'}
                     onClick={onLearn}
-                    icon={<RiseOutlined />}
+                    icon={!props.isLearning && <RiseOutlined />}
                     size={'large'}
-                />
+                >
+                    {props.isLearning && <p>{`${Math.ceil(progressCounter)} %`}</p>}
+                </Button>
             </Space>
         </Header>
     )

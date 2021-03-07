@@ -1,6 +1,5 @@
 import * as _ from 'lodash'
 import {
-    LEARN_POINT_COUNT,
     MAX_FRACTION,
     MAX_RANDOM_ODD,
     MAX_TRIANGLE_AREA,
@@ -309,37 +308,56 @@ export const setBsmRssi = (
         const module = vectorModule(bsmPoint, nonZeroCoords(currentPoint))
         const hyp = hypotenuse
         const relation = module > hyp ? 0 : (module / hyp)
-        const rssi = -relation * 50 - 50
-        bsm.rssi = rssi
+        bsm.rssi = -relation * 50 - 50
     })
 }
 
+/** Вычисления прогресса обучения */
+const calcProgress: (steps: LearnSteps, step: number) => [number, number, number] = (steps: LearnSteps, step: number) => {
+    const fractionIters = Math.ceil((MAX_FRACTION - MIN_FRACTION) / steps.fractionStep)
+    const randomOddIters = Math.ceil((MAX_RANDOM_ODD - MIN_RANDOM_ODD) / steps.randomOddStep)
+    const areaIters = Math.ceil((MAX_TRIANGLE_AREA - MIN_TRIANGLE_AREA) / steps.triangleAreaStep)
+    const all = (fractionIters * randomOddIters * areaIters * steps.learnPointCount)
+   return [step / all, step, all]
+}
+
 /** Поиск оптимальных коэффициентов для случайных величин (для каждого расположения БСМ свои коэффициенты!!!) */
-export const learn: (bsms: IBSM[], width: number, height: number, hypotenuse: number) => [number, number, number] = (
+export const learn: (
     bsms: IBSM[],
     width: number,
     height: number,
-    hypotenuse: number
+    hypotenuse: number,
+    learnSteps: LearnSteps,
+    progressCallback: (progress: [number, number, number]) => void
+) => [number, number, number] = (
+    bsms: IBSM[],
+    width: number,
+    height: number,
+    hypotenuse: number,
+    learnSteps: LearnSteps,
+    progressCallback: (progress: [number, number, number]) => void
 ) => {
     console.log('start learning')
+
+    console.time('learn')
+
+    /** Счетчик итерация для расчета прогресса */
+    let iterCounter: number = 0
 
     /** Хранит результат ошибке в качестве ключа и параметры в значении */
     const resultMap: Map<number, [number, number, number]> = new Map<number, [number, number, number]>()
 
     /** Итерация по отношениям сдвига к центру */
-    for (let fraction: number = MIN_FRACTION; fraction < MAX_FRACTION; fraction += 0.001) {
-        console.log(`fraction: ${fraction}`)
+    for (let fraction: number = MIN_FRACTION; fraction < MAX_FRACTION; fraction += learnSteps.fractionStep) {
         /** Итерция по коэффициентам рандома */
-        for (let randomOdd: number = MIN_RANDOM_ODD; randomOdd < MAX_RANDOM_ODD; randomOdd += 50) {
-            console.log(`randomOdd: ${randomOdd}`)
+        for (let randomOdd: number = MIN_RANDOM_ODD; randomOdd < MAX_RANDOM_ODD; randomOdd += learnSteps.randomOddStep) {
             /** Итерация по площади треугольника */
-            for (let triangleArea: number = MIN_TRIANGLE_AREA; triangleArea < MAX_TRIANGLE_AREA; triangleArea += 50) {
-                console.log(`triangleArea: ${triangleArea}`)
+            for (let triangleArea: number = MIN_TRIANGLE_AREA; triangleArea < MAX_TRIANGLE_AREA; triangleArea += learnSteps.triangleAreaStep) {
 
                 /** Хранит результаты расчетов */
                 const points: [IPoint, IPoint][] = []
 
-                for (let i: number = 0; i < LEARN_POINT_COUNT; i++) {
+                for (let i: number = 0; i < learnSteps.learnPointCount; i++) {
                     /** Создание координат точки */
                     const realX = diapasonRandom(0, height)
                     const realY = diapasonRandom(0, width)
@@ -362,6 +380,10 @@ export const learn: (bsms: IBSM[], width: number, height: number, hypotenuse: nu
                     )
                     /** Сохранить результат */
                     points.push([realPoint, point])
+
+                    iterCounter++
+
+                    progressCallback(calcProgress(learnSteps, iterCounter))
                 }
 
                 const [moduleError] = calcErrors(points)
@@ -377,7 +399,9 @@ export const learn: (bsms: IBSM[], width: number, height: number, hypotenuse: nu
 
     const [fraction, randomOdd, triangleArea] = resultMap.get(min)
 
-    console.log(`fraction: ${fraction}, randomOdd: ${randomOdd}, triangleArea: ${triangleArea}`)
+    console.log('learning is done')
+
+    console.timeEnd('learn')
 
     return [fraction, randomOdd, triangleArea]
 }
