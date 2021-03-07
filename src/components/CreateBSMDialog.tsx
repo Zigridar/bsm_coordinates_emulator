@@ -27,7 +27,7 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
     })
 
     const textObject = new fabric.Text('', {
-        fontSize: 10,
+        fontSize: 8,
         originX: 'center',
         originY: 'center'
     })
@@ -36,6 +36,12 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
         hasControls: false,
         left: 0,
         top: 0
+    })
+
+    group.on('moving', () => {
+        const point = group.getCenterPoint()
+        const [x, y] = [point.x / 100, point.y / 100]
+        textObject.set({text: `${x.toFixed(2)}, ${y.toFixed(2)}`})
     })
 
     const newBsm: BSM = {
@@ -52,7 +58,6 @@ const createBsm: (geoZone: number, color: string) => BSM = (geoZone: number, col
         },
         set rssi(value: number) {
             this._rssi = value
-            textObject.set('text', `${value.toFixed(2)}`)
         },
         get rssi() {
             return this._rssi

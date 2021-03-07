@@ -2,8 +2,7 @@ type FabricState = {
     fantomPoint: fabric.Object
     observable: IObservable
     bsmList: BSM[]
-    canvasDim: [number, number]
-    hypotenuse: number
+    vptCoords: VptCoords
     selection: IDeletableFabric
     randomOdd: number
     minTriangleArea: number
@@ -16,10 +15,10 @@ type FabricObjectAction = {
     observable?: IObservable
     object?: BSM
     removedObject?: fabric.Object
-    canvasDim?: [number, number]
     selection?: fabric.Object,
     numberValue?: number,
-    isLearning?: boolean
+    isLearning?: boolean,
+    vptCoords?: VptCoords
 }
 
 interface IBSM {
@@ -46,10 +45,11 @@ type IDeletableFabric = fabric.Object & {
 type MessageFromMainThread = {
     type: string
     bsms: IBSM[]
-    width: number
-    height: number
-    hypotenuse: number
     steps: LearnSteps
+    minX: number
+    minY: number
+    maxX: number
+    maxY: number
 }
 
 type MessageFromLearnWorker = {
@@ -69,4 +69,11 @@ type LearnSteps = {
     triangleAreaStep: number
     randomOddStep: number
     learnPointCount: number
+}
+
+type VptCoords = {
+    tl: IPoint
+    tr: IPoint
+    bl: IPoint
+    br: IPoint
 }

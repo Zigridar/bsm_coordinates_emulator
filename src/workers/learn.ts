@@ -20,12 +20,21 @@ const progressCallback: (progress: [number, number, number]) => void = (progress
 }
 
 ctx.onmessage = (event: MessageEvent<MessageFromMainThread>) => {
-    const { bsms, width, height, hypotenuse, steps, type } = event.data
+    const { bsms, minX, minY, maxX, maxY, steps, type } = event.data
 
     switch (type) {
         case START_LEARNING:
             console.log('start learning case')
-            const result: [number, number, number] = learn(bsms, width, height, hypotenuse, steps, progressCallback)
+            const result: [number, number, number] =
+            learn(
+                bsms,
+                minX,
+                minY,
+                maxX,
+                maxY,
+                steps,
+                progressCallback
+            )
             const resultMessage: MessageFromLearnWorker = { result, type: LEARN_RESULT }
             ctx.postMessage(resultMessage)
             break

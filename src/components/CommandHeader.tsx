@@ -38,9 +38,8 @@ interface StateProps {
     minTriangleArea: number,
     fraction: number,
     bsms: BSM[],
-    canvasDim: [number, number]
-    hypotenuse: number,
-    isLearning: boolean
+    isLearning: boolean,
+    vptCoords: VptCoords
 }
 
 interface DispatchProps {
@@ -60,9 +59,8 @@ const mapStateToProps = (state: FabricState) => {
         minTriangleArea: state.minTriangleArea,
         randomOdd: state.randomOdd,
         bsms: state.bsmList,
-        canvasDim: state.canvasDim,
-        hypotenuse: state.hypotenuse,
-        isLearning: state.isLearning
+        isLearning: state.isLearning,
+        vptCoords: state.vptCoords
     }
     return props
 }
@@ -85,9 +83,9 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         setMinTriangleArea: (minArea: number) => {
             dispatch(setMinTriangleArea(minArea))
         },
-        setLearning: ((isLearning: boolean) => {
+        setLearning: (isLearning: boolean) => {
             dispatch(setLearningAction(isLearning))
-        })
+        }
     }
     return props
 }
@@ -103,8 +101,6 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
 
         const learnWorker = new LearnWorker()
 
-        const [width, height] = props.canvasDim
-
         //todo set manually
         const steps: LearnSteps = {
             learnPointCount: 1000,
@@ -113,12 +109,19 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
             fractionStep: 0.005
         }
 
+        const minX = props.vptCoords.tl.x
+        const maxX = props.vptCoords.tr.x
+        const minY = props.vptCoords.tl.y
+        const maxY = props.vptCoords.bl.y
+
+
         const message: MessageFromMainThread = {
+            maxX,
+            maxY,
+            minX,
+            minY,
             type: START_LEARNING,
             bsms: simplifyBSM(props.bsms),
-            width: width,
-            height: height,
-            hypotenuse: props.hypotenuse,
             steps
         }
 

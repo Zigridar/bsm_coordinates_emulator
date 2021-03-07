@@ -1,9 +1,13 @@
 import {
     ADD_FABRIC_OBJECT,
-    CHANGE_CANVAS_DIM,
     CHANGE_SELECTION,
-    REMOVE_FABRIC_OBJECT, SET_FRACTION, SET_LEARNING, SET_MIN_TRIANGLE_AREA,
-    SET_OBSERVABLE, SET_RANDOM_ODD
+    REMOVE_FABRIC_OBJECT,
+    SET_FRACTION,
+    SET_LEARNING,
+    SET_MIN_TRIANGLE_AREA,
+    SET_OBSERVABLE,
+    SET_RANDOM_ODD,
+    SET_VPT
 } from './actionTypes'
 import {fabric} from 'fabric'
 
@@ -21,15 +25,6 @@ export const removeObjectAction: (object: fabric.Object) => FabricObjectAction =
         type: REMOVE_FABRIC_OBJECT,
         removedObject: object
     }
-    return action
-}
-
-export const changeCanvasDimAction = (canvasDim: [number, number]) => {
-    const action: FabricObjectAction = {
-        type: CHANGE_CANVAS_DIM,
-        canvasDim
-    }
-
     return action
 }
 
@@ -82,6 +77,15 @@ export const setLearningAction = (isLearning: boolean) => {
     const action: FabricObjectAction = {
         type: SET_LEARNING,
         isLearning: isLearning
+    }
+
+    return action
+}
+
+export const setVPTAction = (vptCoords: VptCoords) => {
+    const action: FabricObjectAction = {
+        type: SET_VPT,
+        vptCoords
     }
 
     return action

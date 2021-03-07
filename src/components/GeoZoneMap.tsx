@@ -3,7 +3,7 @@ import {fabric} from 'fabric'
 import {Canvas, IEvent, ILineOptions} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
 import {Dispatch} from 'redux'
-import {changeCanvasDimAction, changeSelectionAction, setObservableAction} from '../redux/actionCreators'
+import {changeSelectionAction, setObservableAction, setVPTAction} from '../redux/actionCreators'
 
 interface OwnProps {
     cardPadding: number
@@ -16,9 +16,9 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    changeDim: (dim: [number, number]) => void
     changeSelection: (object: fabric.Object) => void
     setObservable: (object: IObservable) => void
+    setVPT: (vpt: VptCoords) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
@@ -33,14 +33,14 @@ const mapStateToProps = (state: FabricState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
     const props: DispatchProps = {
-        changeDim: (dim: [number, number]) => {
-            dispatch(changeCanvasDimAction(dim))
-        },
         changeSelection: (object: fabric.Object) => {
             dispatch(changeSelectionAction(object))
         },
         setObservable: (object: IObservable) => {
             dispatch(setObservableAction(object))
+        },
+        setVPT: (vpt: VptCoords) => {
+            dispatch(setVPTAction(vpt))
         }
     }
 
@@ -56,28 +56,59 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
      }
 
      const lineOptions: ILineOptions = {
-        stroke: '#ebebeb',
+        stroke: '#7a7a7a',
         strokeWidth: 1,
         selectable: false,
         hasBorders: false,
         hasControls: false
      }
 
-     const gridLen = options.width / options.distance
+     const shift = 5000
 
-     for (let i = 0; i < gridLen; i++) {
+     const gridLen = (options.width + shift)/ options.distance
+
+     for (let i: number = -150; i < gridLen; i++) {
          const distance = i * options.distance
 
-         const horizontal = new fabric.Line([distance, 0, distance, options.width], lineOptions)
-         const vertical = new fabric.Line([0, distance, options.width, distance], lineOptions)
+
+         const horizontal = new fabric.Line([distance, -shift, distance, (options.width + shift)], lineOptions)
+         const vertical = new fabric.Line([-shift, distance, (options.width + shift), distance], lineOptions)
 
          if(i % 2 === 0) {
-             horizontal.set({stroke: '#cccccc'})
-             vertical.set({stroke: '#cccccc'})
+             horizontal.set({stroke: '#000000'})
+             vertical.set({stroke: '#000000'})
+         }
+
+         if (distance === 0) {
+             horizontal.set({strokeWidth: 3, stroke: '#ff0000'})
+             vertical.set({strokeWidth: 3, stroke: '#ff0000'})
          }
 
          canvas.add(horizontal)
          canvas.add(vertical)
+     }
+
+     for (let i: number = -50; i < 50; i++) {
+         const horizontalNumberText = new fabric.Text(`${i}`, {
+             fontSize: 15,
+             selectable: false,
+             hasBorders: false,
+             hasControls: false,
+             top: 0,
+             left: i * 100
+         })
+
+         const verticalNumberText = new fabric.Text(`${i}`, {
+             fontSize: 15,
+             selectable: false,
+             hasBorders: false,
+             hasControls: false,
+             top: i * 100,
+             left: 0
+         })
+
+         canvas.add(horizontalNumberText)
+         canvas.add(verticalNumberText)
      }
  }
 
@@ -127,32 +158,55 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         const canvasDim = getDimensions()
 
         const newCanvas = new fabric.Canvas(CANVAS_ID, {
-            backgroundColor: '#fff',
+            backgroundColor: '#eed1d1',
             height: canvasDim.height,
             width: canvasDim.width,
             stopContextMenu: true,
             selection: false
         })
 
-        const snap = 0
-
         newCanvas.on('object:moving', (e: IEvent) => {
             const target = e.target
 
-            const canvasDimensions = getDimensions()
+            const { tl, br } = newCanvas.vptCoords
 
-            if (target.left < snap)
-                target.left = 0
+            const leftBorder = tl.x
+            const topBorder = tl.y
+            const rightBorder = br.x
+            const bottomBorder = br.y
 
-            if (target.top < snap)
-                target.top = 0
+            if (target.left < leftBorder)
+                target.left = leftBorder
 
-            if (target.width + target.left > canvasDimensions.width - snap)
-                target.left = canvasDimensions.width - target.width
+            if (target.top < topBorder)
+                target.top = topBorder
 
-            if (target.height + target.top > canvasDimensions.height - snap)
-                target.top = canvasDimensions.height - target.height
+            if (target.width + target.left > rightBorder)
+                target.left = rightBorder - target.width
 
+            if (target.height + target.top > bottomBorder)
+                target.top = bottomBorder - target.height
+
+        })
+
+        newCanvas.on('mouse:wheel', (event: IEvent & {e: WheelEvent}) => {
+
+            const e = event.e
+            let delta = e.deltaY
+            let zoom = newCanvas.getZoom()
+            zoom *= 0.999 ** delta
+
+            if (zoom > 10) zoom = 10
+            if (zoom < 0.1) zoom = 0.1
+
+            const point = new fabric.Point(e.offsetX, e.offsetY)
+
+            newCanvas.zoomToPoint(point, zoom)
+
+            e.preventDefault()
+            e.stopPropagation()
+
+            props.setVPT(newCanvas.vptCoords)
         })
 
         const canvasHandlers: Array<[string, (e: IEvent) => void]> = [
@@ -186,8 +240,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
         const initialDim = getDimensions()
 
-        props.changeDim([initialDim.width, initialDim.height])
-
         setDimensions({
             ...initialDim
         })
@@ -208,7 +260,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         if (canvas) {
             const dim = getDimensions()
             canvas.setDimensions(dim)
-            props.changeDim([dim.width, dim.height])
+            props.setVPT(canvas.vptCoords)
         }
     }, [dimensions])
 

@@ -19,13 +19,6 @@ export const calcHypotenuse = (width: number, height: number) => {
     return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
 }
 
-export const nonZeroCoords = (point: IPoint) => {
-    const x = point.x >= 0 ? point.x : 0
-    const y = point.y >= 0 ? point.y : 0
-    const absPoint: IPoint = { x, y }
-    return absPoint
-}
-
 const setStrokeWidth = (object: fabric.Object, width: number) => {
     const _object = object as fabric.Group
     _object.getObjects()[0].set('strokeWidth', width)
@@ -319,15 +312,11 @@ export const diapasonRandom = (min: number, max: number) => {
 
 export const setBsmRssi = (
     bsms: IBSM[],
-    currentPoint: IPoint,
-    hypotenuse: number
+    currentPoint: IPoint
 ) => {
     bsms.forEach((bsm: IBSM) => {
         const bsmPoint: IPoint = bsm.staticCoords
-        const module = vectorModule(bsmPoint, nonZeroCoords(currentPoint))
-        const hyp = hypotenuse
-        const relation = module > hyp ? 0 : (module / hyp)
-        bsm.rssi = -relation * 50 - 50
+        bsm.rssi = -vectorModule(bsmPoint, currentPoint)
     })
 }
 
@@ -343,16 +332,18 @@ const calcProgress: (steps: LearnSteps, step: number) => [number, number, number
 /** Поиск оптимальных коэффициентов для случайных величин (для каждого расположения БСМ свои коэффициенты!!!) */
 export const learn: (
     bsms: IBSM[],
-    width: number,
-    height: number,
-    hypotenuse: number,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
     learnSteps: LearnSteps,
     progressCallback: (progress: [number, number, number]) => void
 ) => [number, number, number] = (
     bsms: IBSM[],
-    width: number,
-    height: number,
-    hypotenuse: number,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
     learnSteps: LearnSteps,
     progressCallback: (progress: [number, number, number]) => void
 ) => {
@@ -378,14 +369,13 @@ export const learn: (
 
                 for (let i: number = 0; i < learnSteps.learnPointCount; i++) {
                     /** Создание координат точки */
-                    const realX = diapasonRandom(0, height)
-                    const realY = diapasonRandom(0, width)
+                    const realX = diapasonRandom(minX, maxX)
+                    const realY = diapasonRandom(minY, maxY)
                     const realPoint: IPoint = { x: realX, y: realY }
                     /** Установка RSSI в зависимости от realPoint*/
                     setBsmRssi(
                         bsms,
-                        realPoint,
-                        hypotenuse
+                        realPoint
                     )
 
                     /** 3 БСМ с максимальным RSSI */
