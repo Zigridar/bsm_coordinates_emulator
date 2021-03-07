@@ -135,7 +135,7 @@ const pointByIntersection: (line_1: LineOdds, line_2: LineOdds) => IPoint = (lin
     return { x, y }
 }
 
-const findPoint: (point_1: IPoint, point_2: IPoint, point_3: IPoint, l: Vector, k: Vector, m: Vector, odd: number, minTriangleArea: number, fraction: number) => (IPoint) = (
+const triplePointCase: (point_1: IPoint, point_2: IPoint, point_3: IPoint, l: Vector, k: Vector, m: Vector, odd: number, minTriangleArea: number, fraction: number) => (IPoint) = (
     point_1: IPoint,
     point_2: IPoint,
     point_3: IPoint,
@@ -185,7 +185,7 @@ const findPoint: (point_1: IPoint, point_2: IPoint, point_3: IPoint, l: Vector, 
         const point_2_2 = pointByIntersection(LL, KK)
         const point_3_3 = pointByIntersection(MM, KK)
 
-        return findPoint(
+        return triplePointCase(
             point_1_1,
             point_2_2,
             point_3_3,
@@ -199,6 +199,14 @@ const findPoint: (point_1: IPoint, point_2: IPoint, point_3: IPoint, l: Vector, 
     }
 }
 
+const doublePointCase = (point_1: IPoint, point_2: IPoint) => {
+    return pointByFraction(pointByFraction(point_1, point_2, 1), point_1, diapasonRandom(0.1, 4))
+}
+
+const singlePointCase = (point: IPoint) => {
+    return point //todo calculate by geoZone
+}
+
 /** Рандомный расчет координат */
 export const calcFakePosition: (bsms: IBSM[], odd: number, minTriangleArea: number, fraction: number) => IPoint = (
     bsms: IBSM[],
@@ -206,29 +214,40 @@ export const calcFakePosition: (bsms: IBSM[], odd: number, minTriangleArea: numb
     minTriangleArea: number,
     fraction: number
 ) => {
-    const [bsm_1, bsm_2, bsm_3] = bsms
 
-    /** Точки каждой БСМ */
-    const point_1: IPoint = bsm_1.staticCoords
-    const point_2: IPoint = bsm_2.staticCoords
-    const point_3: IPoint = bsm_3.staticCoords
+    switch (bsms.length) {
+        /** Для случая трех БСМ */
+        case 3:
+            const [bsm_1_3, bsm_2_3, bsm_3_3] = bsms
 
-    /** Направляющие векторы сторон образованного треугольника */
-    const l = directionVector(point_2, point_3)
-    const k = directionVector(point_1, point_3)
-    const m = directionVector(point_1, point_2)
+            /** Точки каждой БСМ */
+            const point_1: IPoint = bsm_1_3.staticCoords
+            const point_2: IPoint = bsm_2_3.staticCoords
+            const point_3: IPoint = bsm_3_3.staticCoords
 
-    return findPoint(
-        point_1,
-        point_2,
-        point_3,
-        l,
-        k,
-        m,
-        odd,
-        minTriangleArea,
-        fraction
-    )
+            /** Направляющие векторы сторон образованного треугольника */
+            const l = directionVector(point_2, point_3)
+            const k = directionVector(point_1, point_3)
+            const m = directionVector(point_1, point_2)
+
+            return triplePointCase(
+                point_1,
+                point_2,
+                point_3,
+                l,
+                k,
+                m,
+                odd,
+                minTriangleArea,
+                fraction
+            )
+        case 2:
+            const [bsm_1_2, bsm_2_2] = bsms
+            return doublePointCase(bsm_1_2.staticCoords, bsm_2_2.staticCoords)
+        case 1:
+            const [bsm_1_1] = bsms
+            return singlePointCase(bsm_1_1.staticCoords)
+    }
 }
 
 export const setCoords = (object: fabric.Object, point: IPoint) => {

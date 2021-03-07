@@ -37,13 +37,16 @@ const initObservable = () => {
             store.getState().hypotenuse
         )
 
-        calcAndDrawFantom(
-            store.getState().fantomPoint,
-            store.getState().bsmList,
-            store.getState().randomOdd,
-            store.getState().minTriangleArea,
-            store.getState().fraction
-        )
+        if (store.getState().bsmList.length > 0)
+            calcAndDrawFantom(
+                store.getState().fantomPoint,
+                store.getState().bsmList,
+                store.getState().randomOdd,
+                store.getState().minTriangleArea,
+                store.getState().fraction
+            )
+        else
+            console.log('Нет БСМ')
     })
 
     const newObservable: IObservable = {
