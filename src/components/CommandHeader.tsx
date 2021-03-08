@@ -2,7 +2,7 @@ import {Header} from 'antd/es/layout/layout'
 import React from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
-import {Button, Slider, Space, Statistic, Tooltip} from 'antd'
+import {Button, Slider, Space, Statistic, Switch, Tooltip} from 'antd'
 import {Dispatch} from 'redux'
 import {
     addObjectAction,
@@ -10,7 +10,7 @@ import {
     removeObjectAction,
     setFractionAction,
     setMinTriangleArea,
-    setRandomOdd
+    setRandomOdd, toggleModeAction
 } from '../redux/actionCreators'
 import {DeleteOutlined} from '@ant-design/icons/lib'
 import CreateBSMDialog from './CreateBSMDialog'
@@ -23,6 +23,8 @@ import {
     MIN_TRIANGLE_AREA
 } from '../constants'
 import LearningDialog from "./StartLearnDialog";
+import LoadJSONDataDialog from "./LoadJSONDataDialog";
+import CreateObservableDialog from "./CreateObservableDialog";
 
 interface OwnProps {
 
@@ -30,13 +32,14 @@ interface OwnProps {
 
 interface StateProps {
     selection: fabric.Object
-    observable: IObservable
+    testObservable: IObservable
     randomOdd: number
     minTriangleArea: number
     fraction: number
     isLearning: boolean
     errors: [number, number, number]
     bsmList: BSM[]
+    isTest: boolean
 }
 
 interface DispatchProps {
@@ -45,18 +48,20 @@ interface DispatchProps {
     setRandomOdd: (randomOdd: number) => void
     setMinTriangleArea: (minArea: number) => void
     setFraction: (fraction: number) => void
+    toggleMode: (isTest: boolean) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
         selection: state.selection,
-        observable: state.observable,
+        testObservable: state.testObservable,
         fraction: state.fraction,
         minTriangleArea: state.minTriangleArea,
         randomOdd: state.randomOdd,
         isLearning: state.isLearning,
         errors: state.errors,
-        bsmList: state.bsmList
+        bsmList: state.bsmList,
+        isTest: state.isTest
     }
     return props
 }
@@ -78,6 +83,9 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         },
         setMinTriangleArea: (minArea: number) => {
             dispatch(setMinTriangleArea(minArea))
+        },
+        toggleMode: (isTest: boolean) => {
+            dispatch(toggleModeAction(isTest))
         }
     }
     return props
@@ -92,12 +100,17 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
     return(
         <Header>
             <Space size={'middle'}>
+                <Switch
+                    checked={props.isTest}
+                    onChange={props.toggleMode}
+                />
+                <CreateObservableDialog/>
                 <CreateBSMDialog isLearning={props.isLearning} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}
                     onClick={() => props.removeSelected(props.selection)}
-                    disabled={!props.selection || props.selection === props.observable.object || props.isLearning}
+                    disabled={!props.selection || props.selection === props.testObservable.movableObject || props.isLearning}
                     icon={<DeleteOutlined/>}
                     size={'large'}
                 />
@@ -126,6 +139,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     min={MIN_TRIANGLE_AREA}
                     max={MAX_TRIANGLE_AREA}
                 />
+                <LoadJSONDataDialog/>
                 <LearningDialog/>
                 <Tooltip
                     title='Расстояние промаха'

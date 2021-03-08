@@ -11,8 +11,7 @@ interface OwnProps {
 
 interface StateProps {
     bsmList: BSM[],
-    fantomPoint: fabric.Object
-    observable: IObservable
+    testObservable: IObservable
 }
 
 interface DispatchProps {
@@ -24,8 +23,7 @@ interface DispatchProps {
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
         bsmList: state.bsmList,
-        fantomPoint: state.fantomPoint,
-        observable: state.observable
+        testObservable: state.testObservable
     }
 
     return props
@@ -251,11 +249,11 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             ...initialDim
         })
 
-        newCanvas.add(props.fantomPoint)
-        props.fantomPoint.center()
+        newCanvas.add(props.testObservable.fakePoint)
+        props.testObservable.fakePoint.center()
 
-        newCanvas.add(props.observable.object)
-        props.observable.object.center()
+        newCanvas.add(props.testObservable.movableObject)
+        props.testObservable.movableObject.center()
 
         createGrid(newCanvas)
 

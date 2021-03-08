@@ -1,5 +1,6 @@
 import {
     ADD_FABRIC_OBJECT,
+    ADD_OBSERVABLE, CHANGE_MODE,
     CHANGE_SELECTION,
     REMOVE_FABRIC_OBJECT,
     SET_FRACTION,
@@ -9,71 +10,15 @@ import {
     SET_RANDOM_ODD,
     SET_VPT
 } from './actionTypes'
-import {calcAndDrawFantom, calcErrors, setBsmRssi} from '../utils'
-import {fabric} from 'fabric'
-import {IEvent} from 'fabric/fabric-impl'
-import store from './store'
-import {STATIST_POINT_COUNT} from "../constants";
-
-const initFantomPoint: () => fabric.Object = () => {
-    const pseudoPoint = new fabric.Circle({
-        radius: 10,
-        fill: '#ff00d5',
-        selectable: false
-    })
-
-    return pseudoPoint
-}
-
-const initObservable = () => {
-    const observableObject = new fabric.Circle({
-        radius: 20,
-        fill: '#3416ff',
-        hasControls: false,
-        selectable: true,
-        hasBorders: false
-    })
-
-    observableObject.on('moving', (e: IEvent) => {
-
-        setBsmRssi(
-            store.getState().bsmList,
-            e.pointer
-        )
-
-        if (store.getState().bsmList.length > 0) {
-            const calculatedPoint = calcAndDrawFantom(
-                store.getState().fantomPoint,
-                store.getState().bsmList,
-                store.getState().randomOdd,
-                store.getState().minTriangleArea,
-                store.getState().fraction
-            )
-            const pointArr = store.getState().statisticPoints
-            if (pointArr.length < STATIST_POINT_COUNT)
-                pointArr.push([e.pointer, calculatedPoint])
-            else {
-                store.getState().errors = calcErrors(pointArr)
-                store.getState().statisticPoints = []
-            }
-        }
-        else
-            console.log('Нет БСМ')
-    })
-
-    const newObservable: IObservable = {
-        object: observableObject
-    }
-
-    return newObservable
-}
+import {initTestObservable} from '../fabricUtils'
 
 const initialState: FabricState = {
+    isTest: true,
+    observables: [],
     errors: [0, 0, 0],
     statisticPoints: [],
     vptCoords: undefined,
-    fantomPoint: initFantomPoint(),
-    observable: initObservable(),
+    testObservable: initTestObservable(-1),
     bsmList: [],
     selection: null,
     randomOdd: 1000,
@@ -107,7 +52,7 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
         case SET_OBSERVABLE:
             return  {
                 ...state,
-                observable: action.observable
+                testObservable: action.observable
             }
         case SET_FRACTION:
             return {
@@ -125,16 +70,26 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
                 randomOdd: action.numberValue
             }
         case SET_LEARNING:
-            state.bsmList.forEach((bsm: BSM) => bsm.setSelectable(!action.isLearning))
+            state.bsmList.forEach((bsm: BSM) => bsm.setSelectable(!action.boolValue))
             return {
                 ...state,
-                isLearning: action.isLearning
+                isLearning: action.boolValue
             }
 
         case SET_VPT:
             return {
                 ...state,
                 vptCoords: action.vptCoords,
+            }
+        case ADD_OBSERVABLE:
+            return {
+                ...state,
+                observables: [...state.observables, action.observable]
+            }
+        case CHANGE_MODE:
+            return {
+                ...state,
+                isTest: action.boolValue
             }
         default:
             return  state

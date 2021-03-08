@@ -1,5 +1,7 @@
 import {
     ADD_FABRIC_OBJECT,
+    ADD_OBSERVABLE,
+    CHANGE_MODE,
     CHANGE_SELECTION,
     REMOVE_FABRIC_OBJECT,
     SET_FRACTION,
@@ -76,7 +78,7 @@ export const setMinTriangleArea = (minArea: number) => {
 export const setLearningAction = (isLearning: boolean) => {
     const action: FabricObjectAction = {
         type: SET_LEARNING,
-        isLearning: isLearning
+        boolValue: isLearning
     }
 
     return action
@@ -86,6 +88,24 @@ export const setVPTAction = (vptCoords: VptCoords) => {
     const action: FabricObjectAction = {
         type: SET_VPT,
         vptCoords
+    }
+
+    return action
+}
+
+export const addObservableAction = (observable: IObservable) => {
+    const action: FabricObjectAction = {
+        type: ADD_OBSERVABLE,
+        observable
+    }
+
+    return action
+}
+
+export const toggleModeAction = (isTest: boolean) => {
+    const action: FabricObjectAction ={
+        type: CHANGE_MODE,
+        boolValue: isTest
     }
 
     return action

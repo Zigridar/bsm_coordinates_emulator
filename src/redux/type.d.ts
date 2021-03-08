@@ -1,6 +1,7 @@
 type FabricState = {
-    fantomPoint: fabric.Object
-    observable: IObservable
+    isTest: boolean
+    observables: IObservable[]
+    testObservable: IObservable
     bsmList: BSM[]
     vptCoords: VptCoords
     selection: IDeletableFabric
@@ -19,7 +20,7 @@ type FabricObjectAction = {
     removedObject?: fabric.Object
     selection?: fabric.Object,
     numberValue?: number,
-    isLearning?: boolean,
+    boolValue?: boolean,
     vptCoords?: VptCoords
 }
 
@@ -39,7 +40,10 @@ type BSM = {
 } & IBSM
 
 interface IObservable {
-    object: fabric.Object
+    imei: number
+    movableObject: fabric.Object | null
+    fakePoint: fabric.Object
+    calculatedPoint: fabric.Object | null
 }
 
 type IDeletableFabric = fabric.Object & {
@@ -81,3 +85,32 @@ type VptCoords = {
     bl: IPoint
     br: IPoint
 }
+
+type FullSu = {
+    syncSign: boolean
+    levelOfMotorActivity: number
+    alarm: boolean
+    temperature: number
+    pressure: number
+    accelerometerSignal: string
+} & ReducedSu
+
+type ReducedSu = {
+    id: number
+    suReceivingTime: number
+    iuList: IuData[]
+}
+
+type IuData = {
+    rssi: number
+    nois: number
+    id: number
+}
+
+type LbsmData = {
+    receivingTime: number
+    receivingNois: number
+    reducedSuList: ReducedSu[]
+    receivingRssi: number
+    fullSuList: FullSu[]
+} | null

@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {Button, Form, InputNumber, Modal} from 'antd'
+import {Button, Form, InputNumber, Modal, Tooltip} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
 import {fabric} from 'fabric'
 import {ColorResult, SketchPicker} from 'react-color'
@@ -27,26 +27,41 @@ const createBsm: (imei: number, color: string, point: IPoint) => BSM = (imei: nu
         strokeWidth: 3
     })
 
-    const textObject = new fabric.Text('', {
+    const shift = circleObject.width / 2
+
+    const coordsTextObject = new fabric.Text('', {
         fontSize: 8,
+        originX: 'center',
+        originY: 'center',
+        opacity: 0.2
+    })
+
+    const titleTextObject = new fabric.Text(`${imei}`, {
+        fontSize: 23,
         originX: 'center',
         originY: 'center'
     })
 
-    const group = new fabric.Group([circleObject, textObject], {
+    const group = new fabric.Group([circleObject, coordsTextObject, titleTextObject], {
         hasControls: false,
-        left: point.x * 100 - 21.5,
-        top: point.y * 100 - 21.5
+        left: point.x * 100 - shift,
+        top: point.y * 100 - shift
     })
 
     const center = group.getCenterPoint()
 
-    textObject.set({ text: `${(center.x / 100).toFixed(2)}, ${(center.y / 100).toFixed(2)}`})
+    coordsTextObject.set({ text: `${(center.x / 100).toFixed(2)}, ${(center.y / 100).toFixed(2)}`})
 
     group.on('moving', () => {
         const point = group.getCenterPoint()
         const [x, y] = [point.x / 100, point.y / 100]
-        textObject.set({text: `${x.toFixed(2)}, ${y.toFixed(2)}`})
+        titleTextObject.set({ opacity: 0.1 })
+        coordsTextObject.set({text: `${x.toFixed(2)}, ${y.toFixed(2)}`, opacity: 1})
+    })
+
+    group.on('moved', () => {
+        titleTextObject.set({ opacity: 1 })
+        coordsTextObject.set({ opacity: 0.2 })
     })
 
     const newBsm: BSM = {
@@ -108,14 +123,18 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
 
     return(
         <>
-            <Button
-                disabled={props.isLearning}
-                shape={'circle'}
-                onClick={() => setModalVisible(() => true)}
-                icon={<PlusOutlined/>}
-                size={'large'}
+            <Tooltip
+                title={'Создать БСМ'}
+            >
+                <Button
+                    disabled={props.isLearning}
+                    shape={'circle'}
+                    onClick={() => setModalVisible(() => true)}
+                    icon={<PlusOutlined/>}
+                    size={'large'}
 
-            />
+                />
+            </Tooltip>
             <Modal
                 centered={true}
                 title={'Create bsm'}

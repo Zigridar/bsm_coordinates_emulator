@@ -126,14 +126,17 @@ const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDial
     return(
         <>
             <Space>
-                <Button
-                    disabled={props.isLearning}
-                    shape={'circle'}
-                    onClick={onOpenDialog}
-                    icon={<RiseOutlined />}
-                    size={'large'}
+                <Tooltip
+                    title={'Обучение'}
                 >
-                </Button>
+                    <Button
+                        disabled={props.isLearning}
+                        shape={'circle'}
+                        onClick={onOpenDialog}
+                        icon={<RiseOutlined/>}
+                        size={'large'}
+                    />
+                </Tooltip>
                 <Tooltip
                     title={`${progress}%`}
                 >

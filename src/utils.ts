@@ -428,3 +428,17 @@ export const simplifyBSM: (bsms: BSM[]) => IBSM[] = (bsms: BSM[]) => {
         return simpleBSM
     })
 }
+
+export const parseLbsmData: (jsonData: string) => LbsmData = (jsonData: string) => {
+    try {
+        return JSON.parse(jsonData) as LbsmData
+    }
+    catch (e) {
+        return null as LbsmData
+    }
+}
+
+//todo
+export const calcPointsByDataMap = (dataMap: Map<number, ReducedSu>) => {
+
+}
