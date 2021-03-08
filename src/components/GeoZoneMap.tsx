@@ -60,7 +60,8 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
         strokeWidth: 1,
         selectable: false,
         hasBorders: false,
-        hasControls: false
+        hasControls: false,
+        evented: false
      }
 
      const shift = 5000
@@ -95,7 +96,8 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
              hasBorders: false,
              hasControls: false,
              top: 0,
-             left: i * 100
+             left: i * 100,
+             evented: false
          })
 
          const verticalNumberText = new fabric.Text(`${i}`, {
@@ -104,7 +106,8 @@ const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
              hasBorders: false,
              hasControls: false,
              top: i * 100,
-             left: 0
+             left: 0,
+             evented: false
          })
 
          canvas.add(horizontalNumberText)
