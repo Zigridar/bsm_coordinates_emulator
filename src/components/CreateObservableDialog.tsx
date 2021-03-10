@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
-import {Dispatch} from 'redux'
 import {connect} from 'react-redux'
-import {Button, Form, InputNumber, Modal, Tooltip} from "antd";
-import {PlusOutlined} from "@ant-design/icons";
-import {SketchPicker} from "react-color";
-import {createObservable} from "../fabricUtils";
-import {addObservableAction} from "../redux/actionCreators";
+import {Button, Form, InputNumber, Modal, Tooltip} from "antd"
+import {PlusOutlined} from '@ant-design/icons'
+import {SketchPicker} from "react-color"
+import {createObservable} from "../fabricUtils"
+import {RootState} from "../redux/store"
+import {addObservable} from "../redux/ActionCreators"
 
 interface OwnProps {
 
@@ -19,21 +19,15 @@ interface DispatchProps {
     addObservable: (observable: IObservable) => void
 }
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        observables: state.observables
+        observables: state.lps.observables
     }
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps = {
-        addObservable: (observable: IObservable) => {
-            dispatch(addObservableAction(observable))
-        }
-    }
-
-    return props
+const mapDispatchToProps: DispatchProps = {
+    addObservable: addObservable
 }
 
 type CreateObservableDialogProps = OwnProps & StateProps & DispatchProps

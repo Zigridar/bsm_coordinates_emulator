@@ -1,10 +1,11 @@
 import React, {useState} from 'react'
-import {Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {Button, InputNumber, Modal, Table, Tooltip} from 'antd'
 import {BarChartOutlined} from '@ant-design/icons'
 import {pointToString} from '../utils'
-import {updateRealPointAction} from '../redux/actionCreators'
+import {RootState} from "../redux/store"
+import {updateRealPoint} from "../redux/ActionCreators";
+import {RealPointUpdate} from "../redux/reducers/statistic.reducer";
 
 
 interface OwnProps {
@@ -16,28 +17,21 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    updateRealPoint: (point: IPoint, index: number) => void
+    updateRealPoint: (update: RealPointUpdate) => void
 }
 
 type DialogProps = OwnProps & StateProps & DispatchProps
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        statData: state.statisticData
+        statData: state.statistic.statisticData
     }
 
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps ={
-        updateRealPoint: (point: IPoint, index: number) => {
-            debugger
-            dispatch(updateRealPointAction(point, index))
-        }
-    }
-
-    return props
+const mapDispatchToProps: DispatchProps = {
+    updateRealPoint: updateRealPoint
 }
 
 const columns = [
@@ -66,17 +60,17 @@ const columns = [
 interface EditRealPointProps {
     point: IPoint
     index: number
-    updateRealPoint: (point: IPoint, index: number) => void
+    updateRealPoint: (update: RealPointUpdate) => void
 }
 
 const EditRealPoint: React.FC<EditRealPointProps> = (props: EditRealPointProps) => {
 
     const onChangeX = (x: number) => {
-        props.updateRealPoint({...props.point, x}, props.index)
+        props.updateRealPoint([{...props.point, x}, props.index])
     }
 
     const onChangeY = (y: number) => {
-        props.updateRealPoint({...props.point, y}, props.index)
+        props.updateRealPoint([{...props.point, y}, props.index])
     }
 
     return(
@@ -119,12 +113,16 @@ const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
 
     return(
         <>
-            <Button
-                size={"large"}
-                shape={"circle"}
-                onClick={() => setVisible(() => true)}
-                icon={<BarChartOutlined />}
-            />
+            <Tooltip
+                title={'Статистика'}
+            >
+                <Button
+                    size={"large"}
+                    shape={"circle"}
+                    onClick={() => setVisible(() => true)}
+                    icon={<BarChartOutlined />}
+                />
+            </Tooltip>
             <Modal
                 width={'800px'}
                 title={'Statistic'}

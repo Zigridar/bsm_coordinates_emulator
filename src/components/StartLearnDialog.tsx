@@ -5,8 +5,8 @@ import LearnWorker from "../workers/LearnWorker"
 import {LEARN_RESULT, PROGRESS, START_LEARNING} from "../workers/WorkerMessageTypes"
 import {simplifyBSM} from "../utils"
 import {connect} from "react-redux"
-import {Dispatch} from "redux"
-import {setFractionAction, setLearningAction, setMinTriangleArea, setRandomOdd} from "../redux/actionCreators"
+import {RootState} from "../redux/store"
+import {changeFraction, changeLearningMode, changeMinArea, changeRandomOdd} from "../redux/ActionCreators";
 
 interface OwnProps {
 
@@ -14,48 +14,36 @@ interface OwnProps {
 
 interface StateProps {
     isLearning: boolean
-    isTest: boolean
+    isTesting: boolean
     vptCoords: VptCoords
     bsms: BSM[]
 }
 
 interface DispatchProps {
-    setRandomOdd: (randomOdd: number) => void
-    setMinTriangleArea: (minArea: number) => void
-    setFraction: (fraction: number) => void
-    setLearning: (isLearning: boolean) => void
+    changeRandomOdd: (randomOdd: number) => void
+    changeMinArea: (minArea: number) => void
+    changeFraction: (fraction: number) => void
+    changeLearningMode: (isLearning: boolean) => void
 }
 
 type StartLearnDialogProps = OwnProps & StateProps & DispatchProps
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        isLearning: state.isLearning,
-        bsms: state.bsmList,
-        vptCoords: state.vptCoords,
-        isTest: state.isTest
+        isLearning: state.random.isLearning,
+        bsms: state.lps.bsmList,
+        vptCoords: state.fabric.vptCoords,
+        isTesting: state.test.isTesting
     }
-
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps = {
-        setFraction: (fraction: number) => {
-            dispatch(setFractionAction(fraction))
-        },
-        setLearning: (isLearning: boolean) => {
-            dispatch(setLearningAction(isLearning))
-        },
-        setMinTriangleArea: (area: number) => {
-            dispatch(setMinTriangleArea(area))
-        },
-        setRandomOdd: (randomOdd: number) => {
-            dispatch(setRandomOdd(randomOdd))
-        }
-    }
+const mapDispatchToProps: DispatchProps = {
+    changeFraction: changeFraction,
+    changeLearningMode: changeLearningMode,
+    changeMinArea: changeMinArea,
+    changeRandomOdd: changeRandomOdd
 
-    return props
 }
 
 const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDialogProps) => {
@@ -72,7 +60,7 @@ const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDial
     })
 
     const onLearn = () => {
-        props.setLearning(true)
+        props.changeLearningMode(true)
 
         const learnWorker = new LearnWorker()
 
@@ -104,11 +92,11 @@ const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDial
                     const [fraction, randomOdd, triangleArea] = result
                     console.log(`learn result: fraction: ${fraction}, randomOdd: ${randomOdd}, triangleArea: ${triangleArea}`)
                     learnWorker.terminate()
-                    props.setLearning(false)
+                    props.changeLearningMode(false)
                     /** Установить вычиселнные коэффициенты */
-                    props.setFraction(fraction)
-                    props.setRandomOdd(randomOdd)
-                    props.setMinTriangleArea(triangleArea)
+                    props.changeFraction(fraction)
+                    props.changeRandomOdd(randomOdd)
+                    props.changeMinArea(triangleArea)
                     setProgress(() => 0)
                     break
             }
@@ -132,7 +120,7 @@ const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDial
                     title={'Обучение'}
                 >
                     <Button
-                        disabled={props.isLearning || !props.isTest}
+                        disabled={props.isLearning || !props.isTesting}
                         shape={'circle'}
                         onClick={onOpenDialog}
                         icon={<RiseOutlined/>}

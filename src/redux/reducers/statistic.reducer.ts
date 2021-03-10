@@ -1,28 +1,34 @@
-import {ADD_STAT_POINTS, ADD_STAT_ROW, CHANGE_ERRORS} from "../actionTypes";
+import {ADD_STAT_POINTS, ADD_STAT_ROWS, CHANGE_ERRORS, UPDATE_REAL_POINT} from "../actionTypes";
 
-
-type StatisticState = {
+export type StatisticState = {
     statisticData: StatisticRow[]
     errors: [number, number, number]
     statisticPoints: [IPoint, IPoint][]
 }
 
-interface AddStatRow {
-    type: typeof ADD_STAT_ROW
-    statRow: StatisticRow
+export interface AddStatRows {
+    type: typeof ADD_STAT_ROWS
+    statRows: StatisticRow[]
 }
 
-interface ChangeErrors {
+export interface ChangeErrors {
     type: typeof CHANGE_ERRORS
     errors: [number, number, number]
 }
 
-interface AddStatPoints {
+export interface AddStatPoints {
     type: typeof ADD_STAT_POINTS
     statPoint: [IPoint, IPoint]
 }
 
-type StatisticAction = AddStatRow | ChangeErrors | AddStatPoints
+export type RealPointUpdate = [IPoint, number]
+
+export interface UpdateRealPointAction {
+    type: typeof UPDATE_REAL_POINT
+    update: RealPointUpdate
+}
+
+export type StatisticAction = AddStatRows | ChangeErrors | AddStatPoints | UpdateRealPointAction
 
 const initialStatisticState: StatisticState = {
     errors: [0, 0, 0],
@@ -32,10 +38,10 @@ const initialStatisticState: StatisticState = {
 
 const statisticReducer = (state: StatisticState = initialStatisticState, action: StatisticAction) => {
     switch (action.type) {
-        case ADD_STAT_ROW:
+        case ADD_STAT_ROWS:
             return {
                 ...state,
-                statisticData: [action.statRow, ...state.statisticData]
+                statisticData: [...action.statRows, ...state.statisticData]
             }
         case ADD_STAT_POINTS:
             return {
@@ -47,6 +53,15 @@ const statisticReducer = (state: StatisticState = initialStatisticState, action:
                 ...state,
                 errors: action.errors
             }
+        case UPDATE_REAL_POINT:
+            const [point, index] = action.update
+            state.statisticData[index].realPoint = point
+            return {
+                ...state,
+                statisticData: [...state.statisticData]
+            }
+        default:
+            return state
     }
 }
 

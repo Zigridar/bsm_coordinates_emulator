@@ -1,33 +1,40 @@
-import {CHANGE_FRACTION, CHANGE_MIN_AREA, CHANGE_RANDOM_ODD} from '../actionTypes'
+import {CHANGE_FRACTION, CHANGE_MIN_AREA, CHANGE_RANDOM_ODD, SET_LEARNING} from '../actionTypes'
 
 
-type RandomState = {
+export type RandomState = {
     randomOdd: number
     minArea: number
     fraction: number
+    isLearning: boolean
 }
 
-interface ChangeRandomOddAction {
+export interface ChangeRandomOddAction {
     type: typeof CHANGE_RANDOM_ODD
     randomOdd: number
 }
 
-interface ChangeMinAreaAction {
+export interface ChangeMinAreaAction {
     type: typeof CHANGE_MIN_AREA
     minArea: number
 }
 
-interface ChangeFractionAction {
+export interface ChangeFractionAction {
     type: typeof CHANGE_FRACTION
     fraction: number
 }
 
-type RandomAction = ChangeRandomOddAction | ChangeMinAreaAction | ChangeFractionAction
+export interface ChangeLearningAction {
+    type: typeof SET_LEARNING,
+    isLearning: boolean
+}
+
+export type RandomAction = ChangeRandomOddAction | ChangeMinAreaAction | ChangeFractionAction | ChangeLearningAction
 
 const initialRandomState: RandomState = {
     fraction: 0.002,
     minArea: 1,
-    randomOdd: 3000
+    randomOdd: 3000,
+    isLearning: false
 }
 
 const randomReducer: (state: RandomState, action: RandomAction) => RandomState = (state: RandomState = initialRandomState, action: RandomAction) => {
@@ -47,6 +54,13 @@ const randomReducer: (state: RandomState, action: RandomAction) => RandomState =
                 ...state,
                 minArea: action.minArea
             }
+        case SET_LEARNING:
+            return {
+                ...state,
+                isLearning: action.isLearning
+            }
+        default:
+            return state
     }
 }
 

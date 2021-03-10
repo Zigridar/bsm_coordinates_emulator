@@ -3,9 +3,9 @@ import {Button, Modal, Tooltip} from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import {UploadOutlined} from '@ant-design/icons'
 import {calcPointsByDataMap, parseLbsmData} from '../utils'
-import {Dispatch} from 'redux'
 import {connect} from 'react-redux'
-import {addStatRowsAction} from '../redux/actionCreators'
+import {RootState} from "../redux/store"
+import {addStatRows} from '../redux/ActionCreators'
 
 interface OwnProps {
 
@@ -23,24 +23,19 @@ interface DispatchProps {
     addStatRows: (statRows: StatisticRow[]) => void
 }
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        bsmList: state.bsmList,
-        observables: state.observables,
-        odd: state.randomOdd,
-        area: state.minTriangleArea,
-        fraction: state.fraction
+        bsmList: state.lps.bsmList,
+        observables: state.lps.observables,
+        odd: state.random.randomOdd,
+        area: state.random.minArea,
+        fraction: state.random.fraction
     }
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps = {
-        addStatRows: (statRows: StatisticRow[]) => {
-            dispatch(addStatRowsAction(statRows))
-        }
-    }
-    return props
+const mapDispatchToProps: DispatchProps = {
+        addStatRows: addStatRows
 }
 
 type LoadJSONDataDialogProps = OwnProps & StateProps & DispatchProps
@@ -116,7 +111,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
         else {
             Modal.error({
                 title: 'Ошибка парсинга',
-                content: 'Не удается рпспознать JSON'
+                content: 'Не удается распознать JSON'
             })
         }
     }

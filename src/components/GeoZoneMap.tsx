@@ -2,8 +2,8 @@ import React, {useEffect, useRef, useState} from 'react'
 import {fabric} from 'fabric'
 import {Canvas, IEvent, ILineOptions} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
-import {Dispatch} from 'redux'
-import {changeSelectionAction, setObservableAction, setVPTAction} from '../redux/actionCreators'
+import {RootState} from "../redux/store"
+import {changeSelection, changeVPT} from "../redux/ActionCreators"
 
 interface OwnProps {
     cardPadding: number
@@ -13,40 +13,27 @@ interface StateProps {
     bsmList: BSM[]
     testObservable: IObservable
     observables: IObservable[]
-    isTest: boolean
+    isTesting: boolean
 }
 
 interface DispatchProps {
     changeSelection: (object: fabric.Object) => void
-    setObservable: (object: IObservable) => void
-    setVPT: (vpt: VptCoords) => void
+    changeVPT: (vpt: VptCoords) => void
 }
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        bsmList: state.bsmList,
-        testObservable: state.testObservable,
-        isTest: state.isTest,
-        observables: state.observables
+        bsmList: state.lps.bsmList,
+        testObservable: state.test.testObservable,
+        isTesting: state.test.isTesting,
+        observables: state.lps.observables
     }
-
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps = {
-        changeSelection: (object: fabric.Object) => {
-            dispatch(changeSelectionAction(object))
-        },
-        setObservable: (object: IObservable) => {
-            dispatch(setObservableAction(object))
-        },
-        setVPT: (vpt: VptCoords) => {
-            dispatch(setVPTAction(vpt))
-        }
-    }
-
-    return props
+const mapDispatchToProps: DispatchProps = {
+    changeSelection: changeSelection,
+    changeVPT: changeVPT
 }
 
 /** create canvas grid */
@@ -211,11 +198,11 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             e.preventDefault()
             e.stopPropagation()
 
-            props.setVPT(newCanvas.vptCoords)
+            props.changeVPT(newCanvas.vptCoords)
         })
 
         newCanvas.on('after:render', () => {
-            props.setVPT(newCanvas.vptCoords)
+            props.changeVPT(newCanvas.vptCoords)
         })
 
         const canvasHandlers: Array<[string, (e: IEvent) => void]> = [
@@ -269,7 +256,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
         if (canvas) {
             const dim = getDimensions()
             canvas.setDimensions(dim)
-            props.setVPT(canvas.vptCoords)
+            props.changeVPT(canvas.vptCoords)
         }
     }, [dimensions])
 
@@ -287,7 +274,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
     /** Переключение режима (тестирование - анализ) */
     useEffect(() => {
         if (canvas) {
-            if (props.isTest) {
+            if (props.isTesting) {
                 props.observables.forEach(item => {
                     canvas.remove(item.calculatedPoint, item.fakePoint)
                 })
@@ -317,7 +304,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
             canvas.renderAll()
         }
-    }, [props.isTest, props.bsmList])
+    }, [props.isTesting, props.bsmList])
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }

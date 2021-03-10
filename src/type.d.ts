@@ -1,32 +1,3 @@
-type FabricState = {
-    isTest: boolean
-    observables: IObservable[]
-    testObservable: IObservable
-    bsmList: BSM[]
-    vptCoords: VptCoords
-    selection: IDeletableFabric
-    randomOdd: number
-    minTriangleArea: number
-    fraction: number
-    isLearning: boolean
-    statisticPoints: [IPoint, IPoint][]
-    statisticData: StatisticRow[]
-    errors: [number, number, number]
-}
-
-type FabricObjectAction = {
-    type: string
-    observable?: IObservable
-    object?: BSM
-    removedObject?: fabric.Object
-    selection?: fabric.Object,
-    numberValue?: number,
-    boolValue?: boolean,
-    vptCoords?: VptCoords,
-    statRows?: StatisticRow[]
-    realPoint?: IPoint
-}
-
 interface IBSM {
     _rssi: number
     imei: number

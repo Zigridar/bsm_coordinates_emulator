@@ -3,15 +3,6 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
 import {Button, Slider, Space, Statistic, Switch, Tooltip} from 'antd'
-import {Dispatch} from 'redux'
-import {
-    addObjectAction,
-    changeSelectionAction,
-    removeObjectAction,
-    setFractionAction,
-    setMinTriangleArea,
-    setRandomOdd, toggleModeAction
-} from '../redux/actionCreators'
 import {DeleteOutlined} from '@ant-design/icons/lib'
 import CreateBSMDialog from './CreateBSMDialog'
 import {
@@ -22,10 +13,19 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from '../constants'
-import LearningDialog from "./StartLearnDialog";
-import LoadJSONDataDialog from "./LoadJSONDataDialog";
-import CreateObservableDialog from "./CreateObservableDialog";
-import StatisticDialog from "./StatisticDialog";
+import LearningDialog from './StartLearnDialog'
+import LoadJSONDataDialog from './LoadJSONDataDialog'
+import CreateObservableDialog from './CreateObservableDialog'
+import StatisticDialog from './StatisticDialog'
+import {RootState} from "../redux/store";
+import {
+    addBsmToCanvas,
+    changeFraction,
+    changeMinArea,
+    changeMode,
+    changeRandomOdd,
+    deleteBSM
+} from "../redux/ActionCreators";
 
 interface OwnProps {
 
@@ -45,51 +45,35 @@ interface StateProps {
 
 interface DispatchProps {
     addBsmToCanvas: (bsm: BSM) => void
-    removeSelected: (object: fabric.Object) => void
-    setRandomOdd: (randomOdd: number) => void
-    setMinTriangleArea: (minArea: number) => void
-    setFraction: (fraction: number) => void
-    toggleMode: (isTest: boolean) => void
+    deleteBSM: (deletable: IDeletableFabric) => void
+    changeRandomOdd: (randomOdd: number) => void
+    changeMinArea: (minArea: number) => void
+    changeFraction: (fraction: number) => void
+    changeMode: (isTest: boolean) => void
 }
 
-const mapStateToProps = (state: FabricState) => {
+const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-        selection: state.selection,
-        testObservable: state.testObservable,
-        fraction: state.fraction,
-        minTriangleArea: state.minTriangleArea,
-        randomOdd: state.randomOdd,
-        isLearning: state.isLearning,
-        errors: state.errors,
-        bsmList: state.bsmList,
-        isTest: state.isTest
+        selection: state.fabric.selection,
+        testObservable: state.test.testObservable,
+        fraction: state.random.fraction,
+        minTriangleArea: state.random.minArea,
+        randomOdd: state.random.randomOdd,
+        isLearning: state.random.isLearning,
+        errors: state.statistic.errors,
+        bsmList: state.lps.bsmList,
+        isTest: state.test.isTesting
     }
     return props
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
-    const props: DispatchProps = {
-        addBsmToCanvas: (bsm: BSM) => {
-            dispatch(addObjectAction(bsm))
-        },
-        removeSelected: (object: fabric.Object) => {
-            dispatch(removeObjectAction(object))
-            dispatch(changeSelectionAction(null))
-        },
-        setFraction: (fraction: number) => {
-            dispatch(setFractionAction(fraction))
-        },
-        setRandomOdd: (randomOdd: number) => {
-            dispatch(setRandomOdd(randomOdd))
-        },
-        setMinTriangleArea: (minArea: number) => {
-            dispatch(setMinTriangleArea(minArea))
-        },
-        toggleMode: (isTest: boolean) => {
-            dispatch(toggleModeAction(isTest))
-        }
-    }
-    return props
+const mapDispatchToProps: DispatchProps = {
+    addBsmToCanvas: addBsmToCanvas,
+    deleteBSM: deleteBSM,
+    changeFraction: changeFraction,
+    changeRandomOdd: changeRandomOdd,
+    changeMinArea: changeMinArea,
+    changeMode: changeMode
 }
 
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
@@ -103,14 +87,14 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
             <Space size={'middle'}>
                 <Switch
                     checked={props.isTest}
-                    onChange={props.toggleMode}
+                    onChange={props.changeMode}
                 />
                 <CreateObservableDialog/>
                 <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}
-                    onClick={() => props.removeSelected(props.selection)}
+                    onClick={() => props.deleteBSM(props.selection)}
                     disabled={!props.selection || props.selection === props.testObservable.movableObject || props.isLearning}
                     icon={<DeleteOutlined/>}
                     size={'large'}
@@ -119,7 +103,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     disabled={props.isLearning}
                     style={{width: '50px'}}
                     value={props.randomOdd}
-                    onChange={props.setRandomOdd}
+                    onChange={props.changeRandomOdd}
                     min={MIN_RANDOM_ODD}
                     max={MAX_RANDOM_ODD}
                 />
@@ -127,7 +111,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     disabled={props.isLearning}
                     style={{width: '50px'}}
                     value={props.fraction}
-                    onChange={props.setFraction}
+                    onChange={props.changeFraction}
                     min={MIN_FRACTION}
                     max={MAX_FRACTION}
                     step={0.0001}
@@ -136,7 +120,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     disabled={props.isLearning}
                     style={{width: '50px'}}
                     value={props.minTriangleArea}
-                    onChange={props.setMinTriangleArea}
+                    onChange={props.changeMinArea}
                     min={MIN_TRIANGLE_AREA}
                     max={MAX_TRIANGLE_AREA}
                 />

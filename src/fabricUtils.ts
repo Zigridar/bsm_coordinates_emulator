@@ -1,8 +1,8 @@
-import {fabric} from "fabric";
-import {IEvent} from "fabric/fabric-impl";
-import store from "./redux/store";
-import {STATIST_POINT_COUNT} from "./constants";
-import {calcAndDrawFantom, calcErrors, setFakeRssi} from "./utils";
+import {fabric} from 'fabric'
+import {IEvent} from 'fabric/fabric-impl'
+import {STATIST_POINT_COUNT} from './constants'
+import {calcAndDrawFantom, calcErrors, setFakeRssi} from './utils'
+import store from "./redux/store"
 
 type FantomShape = 'circle' | 'square'
 
@@ -51,24 +51,25 @@ export const initTestObservable = (imei: number) => {
         observableObject.on('moving', (e: IEvent) => {
 
             setFakeRssi(
-                store.getState().bsmList,
+                store.getState().lps.bsmList,
                 e.pointer
             )
 
-            if (store.getState().bsmList.length > 0) {
+            //todo сделать хорошо
+            if (store.getState().lps.bsmList.length > 0) {
                 const calculatedPoint = calcAndDrawFantom(
-                    store.getState().testObservable.fakePoint,
-                    store.getState().bsmList,
-                    store.getState().randomOdd,
-                    store.getState().minTriangleArea,
-                    store.getState().fraction
+                    store.getState().test.testObservable.fakePoint,
+                    store.getState().lps.bsmList,
+                    store.getState().random.randomOdd,
+                    store.getState().random.minArea,
+                    store.getState().random.fraction
                 )
-                const pointArr = store.getState().statisticPoints
+                const pointArr = store.getState().statistic.statisticPoints
                 if (pointArr.length < STATIST_POINT_COUNT)
                     pointArr.push([e.pointer, calculatedPoint])
                 else {
-                    store.getState().errors = calcErrors(pointArr)
-                    store.getState().statisticPoints = []
+                    store.getState().statistic.errors = calcErrors(pointArr)
+                    store.getState().statistic.statisticPoints = []
                 }
             }
             else
