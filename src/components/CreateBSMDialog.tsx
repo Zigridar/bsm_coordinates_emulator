@@ -15,9 +15,19 @@ type DialogStorage = {
     imei: number
     color: string
     point: IPoint
+    r0: number
+    rssi0: number
+    outsideImei: number
 }
 
-const createBsm: (imei: number, color: string, point: IPoint) => BSM = (imei: number, color: string, point: IPoint) => {
+const createBsm = (
+    imei: number,
+    color: string,
+    point: IPoint,
+    outsideImei: number,
+    r0: number,
+    rssi0: number
+) => {
     const circleObject = new fabric.Circle({
         radius: 20,
         originX: 'center',
@@ -65,10 +75,11 @@ const createBsm: (imei: number, color: string, point: IPoint) => BSM = (imei: nu
     })
 
     const newBsm: BSM = {
-        rssi0: 50,
-        r0: 1,
+        rssi0,
+        outsideImei,
+        r0,
         _rssi: 0,
-        imei: imei,
+        imei,
         object: group,
         _staticCoords: group.getCenterPoint(),
         get staticCoords() {
@@ -96,7 +107,10 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     const [dialogStorage, setDialogStorage] = useState<DialogStorage>({
         imei: 1,
         color: '#dc0808',
-        point: { x: 0, y: 0 }
+        point: { x: 0, y: 0 },
+        outsideImei: 0,
+        r0: 1,
+        rssi0: -63
     })
 
     const onCancel: () => void = () => setModalVisible(() => false)
@@ -104,7 +118,14 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     const onOk: () => void = () => {
         if (!props.bsmList.find((bsm: BSM) => bsm.imei === dialogStorage.imei)) {
             setModalVisible(() => false)
-            props.addBsmToCanvas(createBsm(dialogStorage.imei, dialogStorage.color, dialogStorage.point))
+            props.addBsmToCanvas(createBsm(
+                dialogStorage.imei,
+                dialogStorage.color,
+                dialogStorage.point,
+                dialogStorage.outsideImei,
+                dialogStorage.r0,
+                dialogStorage.rssi0
+            ))
         }
         else {
             Modal.error({
@@ -167,6 +188,30 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                         <InputNumber
                             value={dialogStorage.point.y}
                             onChange={(y: number) => setDialogStorage(prev => ({...prev, point: {...prev.point, y}}))}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label={'RSSI0'}
+                    >
+                        <InputNumber
+                            value={dialogStorage.rssi0}
+                            onChange={(rssi0: number) => setDialogStorage(prev => ({...prev, rssi0}))}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label={'IMEI внешнего блока'}
+                    >
+                        <InputNumber
+                            value={dialogStorage.outsideImei}
+                            onChange={(outsideImei: number) => setDialogStorage(prev => ({...prev, outsideImei}))}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label={'r0'}
+                    >
+                        <InputNumber
+                            value={dialogStorage.r0}
+                            onChange={(r0: number) => setDialogStorage(prev => ({...prev, r0}))}
                         />
                     </Form.Item>
                     <Form.Item

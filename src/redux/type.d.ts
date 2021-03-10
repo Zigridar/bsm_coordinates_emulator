@@ -40,6 +40,7 @@ type BSM = {
     object: IDeletableFabric
     rssi0: number
     r0: number
+    outsideImei: number
 } & IBSM
 
 interface IObservable {

@@ -11,7 +11,7 @@ import {
     SET_VPT, UPDATE_REAL_POINT
 } from './actionTypes'
 import {initTestObservable} from '../fabricUtils'
-import {setCoords} from "../utils";
+import {setCoords} from '../utils'
 
 const initialState: FabricState = {
     statisticData: [
