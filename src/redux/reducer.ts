@@ -3,25 +3,18 @@ import {
     ADD_OBSERVABLE, ADD_STAT_ROW, CHANGE_MODE,
     CHANGE_SELECTION,
     REMOVE_FABRIC_OBJECT,
-    SET_FRACTION,
+    CHANGE_FRACTION,
     SET_LEARNING,
-    SET_MIN_TRIANGLE_AREA,
+    CHANGE_MIN_AREA,
     SET_OBSERVABLE,
-    SET_RANDOM_ODD,
+    CHANGE_RANDOM_ODD,
     SET_VPT, UPDATE_REAL_POINT
 } from './actionTypes'
 import {initTestObservable} from '../fabricUtils'
 import {setCoords} from '../utils'
 
 const initialState: FabricState = {
-    statisticData: [
-        {
-            realPoint: { x: 5, y: 5 },
-            randomPoint: { x: 0, y: 0 },
-            observableImei: -1,
-            calcPoint: { x: 1, y: 1 }
-        }
-    ],
+    statisticData: [],
     isTest: true,
     observables: [],
     errors: [0, 0, 0],
@@ -63,17 +56,17 @@ const reducer = (state: FabricState = initialState, action: FabricObjectAction):
                 ...state,
                 testObservable: action.observable
             }
-        case SET_FRACTION:
+        case CHANGE_FRACTION:
             return {
                 ...state,
                 fraction: action.numberValue
             }
-        case SET_MIN_TRIANGLE_AREA:
+        case CHANGE_MIN_AREA:
             return {
                 ...state,
                 minTriangleArea: action.numberValue
             }
-        case SET_RANDOM_ODD:
+        case CHANGE_RANDOM_ODD:
             return {
                 ...state,
                 randomOdd: action.numberValue

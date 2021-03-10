@@ -4,11 +4,11 @@ import {
     CHANGE_MODE,
     CHANGE_SELECTION,
     REMOVE_FABRIC_OBJECT,
-    SET_FRACTION,
+    CHANGE_FRACTION,
     SET_LEARNING,
-    SET_MIN_TRIANGLE_AREA,
+    CHANGE_MIN_AREA,
     SET_OBSERVABLE,
-    SET_RANDOM_ODD,
+    CHANGE_RANDOM_ODD,
     SET_VPT, UPDATE_REAL_POINT
 } from './actionTypes'
 import {fabric} from 'fabric'
@@ -50,7 +50,7 @@ export const setObservableAction = (object: IObservable) => {
 
 export const setFractionAction = (fraction: number) => {
     const action: FabricObjectAction = {
-        type: SET_FRACTION,
+        type: CHANGE_FRACTION,
         numberValue: fraction
     }
 
@@ -59,7 +59,7 @@ export const setFractionAction = (fraction: number) => {
 
 export const setRandomOdd = (randomOdd: number) => {
     const action: FabricObjectAction = {
-        type: SET_RANDOM_ODD,
+        type: CHANGE_RANDOM_ODD,
         numberValue: randomOdd
     }
 
@@ -68,7 +68,7 @@ export const setRandomOdd = (randomOdd: number) => {
 
 export const setMinTriangleArea = (minArea: number) => {
     const action: FabricObjectAction = {
-        type: SET_MIN_TRIANGLE_AREA,
+        type: CHANGE_MIN_AREA,
         numberValue: minArea
     }
 
