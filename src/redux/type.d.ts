@@ -10,6 +10,7 @@ type FabricState = {
     fraction: number
     isLearning: boolean
     statisticPoints: [IPoint, IPoint][]
+    statisticData: StatisticRow[]
     errors: [number, number, number]
 }
 
@@ -21,7 +22,9 @@ type FabricObjectAction = {
     selection?: fabric.Object,
     numberValue?: number,
     boolValue?: boolean,
-    vptCoords?: VptCoords
+    vptCoords?: VptCoords,
+    statRows?: StatisticRow[]
+    realPoint?: IPoint
 }
 
 interface IBSM {
@@ -114,3 +117,18 @@ type LbsmData = {
     receivingRssi: number
     fullSuList: FullSu[]
 } | null
+
+type StatisticRow = {
+    observableImei: number
+    calcPoint: IPoint
+    randomPoint: IPoint
+    realPoint: IPoint
+}
+
+type StatTableRow = {
+    key: string
+    imei: number
+    calculated: string
+    random: string
+    real: React.ReactNode
+}

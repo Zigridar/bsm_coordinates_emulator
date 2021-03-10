@@ -5,6 +5,7 @@ import {UploadOutlined} from '@ant-design/icons'
 import {calcPointsByDataMap, parseLbsmData} from '../utils'
 import {Dispatch} from 'redux'
 import {connect} from 'react-redux'
+import {addStatRowsAction} from '../redux/actionCreators'
 
 interface OwnProps {
 
@@ -12,22 +13,32 @@ interface OwnProps {
 
 interface StateProps {
     bsmList: BSM[]
+    observables: IObservable[]
+    odd: number
+    area: number
+    fraction: number
 }
 
 interface DispatchProps {
-
+    addStatRows: (statRows: StatisticRow[]) => void
 }
 
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
-        bsmList: state.bsmList
+        bsmList: state.bsmList,
+        observables: state.observables,
+        odd: state.randomOdd,
+        area: state.minTriangleArea,
+        fraction: state.fraction
     }
     return props
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<FabricObjectAction>) => {
     const props: DispatchProps = {
-
+        addStatRows: (statRows: StatisticRow[]) => {
+            dispatch(addStatRowsAction(statRows))
+        }
     }
     return props
 }
@@ -48,38 +59,57 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
         const parsedData = parseLbsmData(text)
         if (parsedData) {
 
-            const dataMap: Map<number, ReducedSu> = new Map<number, ReducedSu>()
+            const dataMap: Map<[number, number], ReducedSu> = new Map<[number, number], ReducedSu>()
 
             parsedData.reducedSuList.forEach((reducedSu) => {
-                dataMap.set(reducedSu.id, reducedSu)
+                dataMap.set([reducedSu.suReceivingTime, reducedSu.id], reducedSu)
             })
 
             parsedData.fullSuList.forEach((fullSu) => {
-                dataMap.set(fullSu.id, fullSu)
+                dataMap.set([fullSu.suReceivingTime, fullSu.id], fullSu)
             })
 
-            const notFound = new Set<number>()
+            const notFoundBsms = new Set<number>()
 
+            const notFoundObservables = new Set<number>()
             dataMap.forEach(value => {
+
+                if (!props.observables.find(obs => obs.imei === value.id))
+                    notFoundObservables.add(value.id)
 
                 value.iuList.forEach(iu => {
                     if (!props.bsmList.find(bsm => bsm.imei === iu.id)) {
-                        notFound.add(iu.id)
+                        notFoundBsms.add(iu.id)
                     }
                 })
             })
 
-            notFound.forEach(item => {
+            notFoundBsms.forEach(item => {
                 Modal.error({
                     title: 'Ошибка',
                     content: `БСМ с imei: ${item} не найдена`
                 })
             })
 
-            if (notFound.size > 0)
+            notFoundObservables.forEach(item => {
+                Modal.error({
+                    title: 'Ошибка',
+                    content: `Объект наблюдения с imei: ${item} не найден`
+                })
+            })
+
+            if (notFoundBsms.size > 0 || notFoundObservables.size > 0)
                 return onCancel()
 
-            calcPointsByDataMap(dataMap)
+            const statisticRows = calcPointsByDataMap(
+                dataMap,
+                props.bsmList,
+                props.odd,
+                props.area,
+                props.fraction
+            )
+
+            props.addStatRows(statisticRows)
 
             onCancel()
         }
@@ -108,6 +138,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
                 />
             </Tooltip>
             <Modal
+                title={'JSON load'}
                 visible={isModalVisible}
                 onOk={onOk}
                 onCancel={onCancel}

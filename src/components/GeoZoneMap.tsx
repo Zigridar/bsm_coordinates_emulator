@@ -10,8 +10,10 @@ interface OwnProps {
 }
 
 interface StateProps {
-    bsmList: BSM[],
+    bsmList: BSM[]
     testObservable: IObservable
+    observables: IObservable[]
+    isTest: boolean
 }
 
 interface DispatchProps {
@@ -23,7 +25,9 @@ interface DispatchProps {
 const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
         bsmList: state.bsmList,
-        testObservable: state.testObservable
+        testObservable: state.testObservable,
+        isTest: state.isTest,
+        observables: state.observables
     }
 
     return props
@@ -272,8 +276,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
     /** update */
     useEffect(() => {
         if (canvas) {
-            const newObjects = props.bsmList.map((item: BSM) => item.object)
-            canvas.add(...newObjects)
             canvas.getObjects().forEach((item: IDeletableFabric) => {
                 if (item.forDelete)
                     canvas.remove(item)
@@ -281,6 +283,41 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             canvas.renderAll()
         }
     })
+
+    /** Переключение режима (тестирование - анализ) */
+    useEffect(() => {
+        if (canvas) {
+            if (props.isTest) {
+                props.observables.forEach(item => {
+                    canvas.remove(item.calculatedPoint, item.fakePoint)
+                })
+
+                props.bsmList.forEach(bsm => {
+                    bsm.setSelectable(true)
+                })
+
+                canvas.add(props.testObservable.fakePoint, props.testObservable.movableObject)
+            }
+            else {
+                canvas.discardActiveObject()
+
+                canvas.remove(props.testObservable.fakePoint, props.testObservable.movableObject)
+                props.observables.forEach(item => {
+                    canvas.add(item.calculatedPoint, item.fakePoint)
+                })
+
+                props.bsmList.forEach(bsm => {
+                    bsm.setSelectable(false)
+                })
+            }
+
+            props.bsmList.forEach(bsm => {
+                canvas.add(bsm.object)
+            })
+
+            canvas.renderAll()
+        }
+    }, [props.isTest, props.bsmList])
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }

@@ -1,6 +1,6 @@
 import {
     ADD_FABRIC_OBJECT,
-    ADD_OBSERVABLE,
+    ADD_OBSERVABLE, ADD_STAT_ROW,
     CHANGE_MODE,
     CHANGE_SELECTION,
     REMOVE_FABRIC_OBJECT,
@@ -9,7 +9,7 @@ import {
     SET_MIN_TRIANGLE_AREA,
     SET_OBSERVABLE,
     SET_RANDOM_ODD,
-    SET_VPT
+    SET_VPT, UPDATE_REAL_POINT
 } from './actionTypes'
 import {fabric} from 'fabric'
 
@@ -106,6 +106,25 @@ export const toggleModeAction = (isTest: boolean) => {
     const action: FabricObjectAction ={
         type: CHANGE_MODE,
         boolValue: isTest
+    }
+
+    return action
+}
+
+export const addStatRowsAction = (statRows: StatisticRow[]) => {
+    const action: FabricObjectAction = {
+        type: ADD_STAT_ROW,
+        statRows
+    }
+
+    return action
+}
+
+export const updateRealPointAction = (point: IPoint, index: number) => {
+    const action: FabricObjectAction = {
+        type: UPDATE_REAL_POINT,
+        realPoint: point,
+        numberValue: index
     }
 
     return action

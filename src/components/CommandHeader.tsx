@@ -25,6 +25,7 @@ import {
 import LearningDialog from "./StartLearnDialog";
 import LoadJSONDataDialog from "./LoadJSONDataDialog";
 import CreateObservableDialog from "./CreateObservableDialog";
+import StatisticDialog from "./StatisticDialog";
 
 interface OwnProps {
 
@@ -105,7 +106,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     onChange={props.toggleMode}
                 />
                 <CreateObservableDialog/>
-                <CreateBSMDialog isLearning={props.isLearning} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
+                <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}
@@ -116,7 +117,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                 />
                 <Slider
                     disabled={props.isLearning}
-                    style={{width: '200px'}}
+                    style={{width: '50px'}}
                     value={props.randomOdd}
                     onChange={props.setRandomOdd}
                     min={MIN_RANDOM_ODD}
@@ -124,7 +125,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                 />
                 <Slider
                     disabled={props.isLearning}
-                    style={{width: '200px'}}
+                    style={{width: '50px'}}
                     value={props.fraction}
                     onChange={props.setFraction}
                     min={MIN_FRACTION}
@@ -133,13 +134,14 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                 />
                 <Slider
                     disabled={props.isLearning}
-                    style={{width: '200px'}}
+                    style={{width: '50px'}}
                     value={props.minTriangleArea}
                     onChange={props.setMinTriangleArea}
                     min={MIN_TRIANGLE_AREA}
                     max={MAX_TRIANGLE_AREA}
                 />
                 <LoadJSONDataDialog/>
+                <StatisticDialog/>
                 <LearningDialog/>
                 <Tooltip
                     title='Расстояние промаха'

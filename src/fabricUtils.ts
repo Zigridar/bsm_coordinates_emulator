@@ -2,11 +2,21 @@ import {fabric} from "fabric";
 import {IEvent} from "fabric/fabric-impl";
 import store from "./redux/store";
 import {STATIST_POINT_COUNT} from "./constants";
-import {calcAndDrawFantom, calcErrors, setBsmRssi} from "./utils";
+import {calcAndDrawFantom, calcErrors, setFakeRssi} from "./utils";
 
-const initFantomPoint: (color: string, imei: number) => fabric.Object = (color: string, imei: number) => {
-    const pseudoPoint = new fabric.Circle({
+type FantomShape = 'circle' | 'square'
+
+const initFantomPoint: (color: string, imei: number, shape: FantomShape) => fabric.Object = (color: string, imei: number, shape: FantomShape = 'circle') => {
+    const pseudoPoint = shape === 'circle' ?
+    new fabric.Circle({
         radius: 10,
+        fill: color,
+        originY: 'center',
+        originX: 'center'
+    }) :
+    new fabric.Rect({
+        width: 20,
+        height: 20,
         fill: color,
         originY: 'center',
         originX: 'center'
@@ -20,7 +30,9 @@ const initFantomPoint: (color: string, imei: number) => fabric.Object = (color: 
 
     const group = new fabric.Group([pseudoPoint, imeiText], {
         selectable: false,
-        evented: false
+        evented: false,
+        left: 300,
+        top: 300
     })
 
     return group
@@ -38,7 +50,7 @@ export const initTestObservable = (imei: number) => {
 
         observableObject.on('moving', (e: IEvent) => {
 
-            setBsmRssi(
+            setFakeRssi(
                 store.getState().bsmList,
                 e.pointer
             )
@@ -65,7 +77,7 @@ export const initTestObservable = (imei: number) => {
 
     const observable: IObservable = {
         movableObject: observableObject,
-        fakePoint: initFantomPoint('#ff00d5', -1),
+        fakePoint: initFantomPoint('#ff00d5', -1, "circle"),
         calculatedPoint: null,
         imei: imei
     }
@@ -76,8 +88,8 @@ export const initTestObservable = (imei: number) => {
 export const createObservable = (imei: number, fakePointColor: string, calcPointColor: string) => {
     const observable: IObservable = {
         imei,
-        fakePoint: initFantomPoint(fakePointColor, imei),
-        calculatedPoint: initFantomPoint(calcPointColor, imei),
+        fakePoint: initFantomPoint(fakePointColor, imei, "circle"),
+        calculatedPoint: initFantomPoint(calcPointColor, imei, "square"),
         movableObject: null
     }
 

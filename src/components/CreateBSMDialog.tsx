@@ -7,7 +7,7 @@ import {ColorResult, SketchPicker} from 'react-color'
 
 type CreateBSMDialogProps = {
     addBsmToCanvas: (bsm: BSM) => void
-    isLearning: boolean
+    canCreate: () => boolean
     bsmList: BSM[]
 }
 
@@ -127,7 +127,7 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
                 title={'Создать БСМ'}
             >
                 <Button
-                    disabled={props.isLearning}
+                    disabled={!props.canCreate()}
                     shape={'circle'}
                     onClick={() => setModalVisible(() => true)}
                     icon={<PlusOutlined/>}

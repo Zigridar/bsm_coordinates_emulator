@@ -14,6 +14,7 @@ interface OwnProps {
 
 interface StateProps {
     isLearning: boolean
+    isTest: boolean
     vptCoords: VptCoords
     bsms: BSM[]
 }
@@ -31,7 +32,8 @@ const mapStateToProps = (state: FabricState) => {
     const props: StateProps = {
         isLearning: state.isLearning,
         bsms: state.bsmList,
-        vptCoords: state.vptCoords
+        vptCoords: state.vptCoords,
+        isTest: state.isTest
     }
 
     return props
@@ -130,7 +132,7 @@ const StartLearnDialog: React.FC<StartLearnDialogProps> = (props: StartLearnDial
                     title={'Обучение'}
                 >
                     <Button
-                        disabled={props.isLearning}
+                        disabled={props.isLearning || !props.isTest}
                         shape={'circle'}
                         onClick={onOpenDialog}
                         icon={<RiseOutlined/>}

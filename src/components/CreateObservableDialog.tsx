@@ -40,8 +40,7 @@ type CreateObservableDialogProps = OwnProps & StateProps & DispatchProps
 
 interface DialogStore {
     imei: number
-    fakePointColor: string
-    calcPointColor: string
+    color: string
 }
 
 const CreateObservable: React.FC<CreateObservableDialogProps> = (props: CreateObservableDialogProps) => {
@@ -49,8 +48,7 @@ const CreateObservable: React.FC<CreateObservableDialogProps> = (props: CreateOb
     const [isModalVisible, setModalVisible] = useState<boolean>(false)
 
     const [dialogStorage, setDialogStorage] = useState<DialogStore>({
-        calcPointColor: '#0802e7',
-        fakePointColor: '#ff0000',
+        color: '#ff0000',
         imei: 1
     })
 
@@ -64,7 +62,7 @@ const CreateObservable: React.FC<CreateObservableDialogProps> = (props: CreateOb
             })
         }
         else {
-            const observable = createObservable(dialogStorage.imei, dialogStorage.fakePointColor, dialogStorage.calcPointColor)
+            const observable = createObservable(dialogStorage.imei, dialogStorage.color, dialogStorage.color)
             props.addObservable(observable)
             onCancel()
         }
@@ -107,17 +105,8 @@ const CreateObservable: React.FC<CreateObservableDialogProps> = (props: CreateOb
                         label={'fake point color'}
                     >
                         <SketchPicker
-                            color={dialogStorage.fakePointColor}
-                            onChange={color => setDialogStorage(prev => ({...prev, fakePointColor: color.hex}))}
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        required={true}
-                        label={'calc point color'}
-                    >
-                        <SketchPicker
-                            color={dialogStorage.calcPointColor}
-                            onChange={color => setDialogStorage(prev => ({...prev, calcPointColor: color.hex}))}
+                            color={dialogStorage.color}
+                            onChange={color => setDialogStorage(prev => ({...prev, color: color.hex}))}
                         />
                     </Form.Item>
                 </Form>

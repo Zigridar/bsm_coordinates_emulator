@@ -310,7 +310,7 @@ export const diapasonRandom = (min: number, max: number) => {
     return Math.round(rand)
 }
 
-export const setBsmRssi = (
+export const setFakeRssi = (
     bsms: IBSM[],
     currentPoint: IPoint
 ) => {
@@ -373,7 +373,7 @@ export const learn: (
                     const realY = diapasonRandom(minY, maxY)
                     const realPoint: IPoint = { x: realX, y: realY }
                     /** Установка RSSI в зависимости от realPoint*/
-                    setBsmRssi(
+                    setFakeRssi(
                         bsms,
                         realPoint
                     )
@@ -438,7 +438,94 @@ export const parseLbsmData: (jsonData: string) => LbsmData = (jsonData: string) 
     }
 }
 
-//todo
-export const calcPointsByDataMap = (dataMap: Map<number, ReducedSu>) => {
-
+/** Расстояние между БСМ и объектом наблюдения */
+const rParam: (bsm: BSM) => number = (bsm: BSM) => {
+    return (bsm.r0 * Math.pow(10, (bsm.rssi0 - bsm.rssi) / 20))
 }
+
+/** Расчет точки по RSSI */
+export const calcPointByRssi: (bsms: BSM[]) => IPoint = (
+    bsms: BSM[]
+) => {
+    const [
+        [point_1, r1],
+        [point_2, r2],
+        [point_3, r3]
+    ] = bsms.map(bsm => {
+        return [bsm.object.getCenterPoint(), rParam(bsm)]
+    })
+
+    const M1 = point_2.x - point_1.x
+    const M2 = point_3.x - point_1.x
+
+    const N1 = point_2.y - point_1.y
+    const N2 = point_3.y - point_1.y
+
+    const L1 = 0.5 * (r1 ** 2 - r2 ** 2 - point_1.x ** 2 - point_1.y ** 2 + point_2.x ** 2 + point_2.y ** 2)
+    const L2 = 0.5 * (r1 ** 2 - r3 ** 2 - point_1.x ** 2 - point_1.y ** 2 + point_3.x ** 2 + point_3.y ** 2)
+
+    const dD = M1 * N2 - M2 * N1
+
+    const x = (L1 * N2 - L2 * N1) / dD
+    const y = (M1 * L2 - M2 * L1) / dD
+
+    const point: IPoint = { x, y }
+    return point
+}
+
+/** Расчет случайной точки и по RSSI */
+export const calcPointsByDataMap: (dataMap: Map<[number, number], ReducedSu>, bsms: BSM[], odd: number, area: number, fraction: number) => StatisticRow[] = (
+    dataMap: Map<[number, number], ReducedSu>,
+    bsms: BSM[],
+    odd: number,
+    area: number,
+    fraction: number
+) => {
+
+    /** Хранилище результирующих точек */
+    const resultRows: StatisticRow[] = []
+
+    dataMap.forEach((suData: ReducedSu) => {
+
+        /** imei объекта наблюдения */
+        const observableImei = suData.id
+
+        /** Выбор трех БСМ с наивысшим RSSI */
+        const filteredBsms = _(suData.iuList)
+            .sortBy(iuData => iuData.rssi)
+            .takeRight(3)
+            .reverse()
+            .map(iuData => {
+                const bsm = bsms.find(_bsm => _bsm.imei === iuData.id)
+                bsm.rssi = iuData.rssi
+                return bsm
+            })
+            .value()
+
+
+        /**  Расчет случайной точки */
+        const randomPoint: IPoint = calcFakePosition(
+            filteredBsms,
+            odd,
+            area,
+            fraction
+        )
+
+        /** Расчет точки по RSSI */
+        const calcPoint: IPoint = calcPointByRssi(filteredBsms)
+
+        /** realPoint заполняется вручную */
+        const statRow: StatisticRow = {
+            observableImei,
+            calcPoint,
+            randomPoint,
+            realPoint: { x: 0, y: 0 }
+        }
+
+        resultRows.push(statRow)
+    })
+
+    return resultRows
+}
+
+export const pointToString = (point: IPoint) => `x: ${point.x / 100}, y: ${point.y / 100}`
