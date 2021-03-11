@@ -3,7 +3,7 @@ import {fabric} from 'fabric'
 import {Canvas, IEvent, ILineOptions} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
 import {RootState} from "../redux/store"
-import {changeSelection, changeVPT} from "../redux/ActionCreators"
+import {changeSelection, changeVPT} from '../redux/ActionCreators'
 
 interface OwnProps {
     cardPadding: number
@@ -157,6 +157,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             selection: false
         })
 
+        /** border restriction */
         newCanvas.on('object:moving', (e: IEvent) => {
             const target = e.target
 
@@ -181,6 +182,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
         })
 
+        /** zoom */
         newCanvas.on('mouse:wheel', (event: IEvent & {e: WheelEvent}) => {
 
             const e = event.e
@@ -267,6 +269,12 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
                 if (item.forDelete)
                     canvas.remove(item)
             })
+
+            props.bsmList.forEach(bsm => {
+                if (!bsm.object.canvas && !bsm.object.forDelete)
+                    canvas.add(bsm.object)
+            })
+
             canvas.renderAll()
         }
     })
@@ -274,6 +282,7 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
     /** Переключение режима (тестирование - анализ) */
     useEffect(() => {
         if (canvas) {
+            canvas.discardActiveObject()
             if (props.isTesting) {
                 props.observables.forEach(item => {
                     canvas.remove(item.calculatedPoint, item.fakePoint)
@@ -286,8 +295,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
                 canvas.add(props.testObservable.fakePoint, props.testObservable.movableObject)
             }
             else {
-                canvas.discardActiveObject()
-
                 canvas.remove(props.testObservable.fakePoint, props.testObservable.movableObject)
                 props.observables.forEach(item => {
                     canvas.add(item.calculatedPoint, item.fakePoint)
@@ -298,13 +305,9 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
                 })
             }
 
-            props.bsmList.forEach(bsm => {
-                canvas.add(bsm.object)
-            })
-
             canvas.renderAll()
         }
-    }, [props.isTesting, props.bsmList])
+    }, [props.isTesting])
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }
