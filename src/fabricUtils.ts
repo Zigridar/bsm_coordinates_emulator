@@ -30,6 +30,7 @@ const initFantomPoint: (color: string, imei: number, shape: FantomShape) => fabr
 
     const group = new fabric.Group([pseudoPoint, imeiText], {
         selectable: false,
+        hasControls: false,
         evented: false,
         left: 300,
         top: 300
@@ -138,13 +139,13 @@ export const deserializeObservable: (observableStr: string) => Promise<IObservab
 
     const fakePoint = await parseFabricObjectFromString(serializedObservable.fakePoint)
     const calculatedPoint = await parseFabricObjectFromString(serializedObservable.calculatedPoint)
-    fakePoint.set({ hasControls: false })
-    calculatedPoint.set({ hasControls: false })
+    fakePoint.set({ selectable: false, evented: false })
+    calculatedPoint.set({ selectable: false, evented: false })
 
     const observable: IObservable = {
         imei: serializedObservable.imei,
         fakePoint,
-        calculatedPoint: await parseFabricObjectFromString(serializedObservable.calculatedPoint),
+        calculatedPoint,
         movableObject: null
     }
 
@@ -214,5 +215,5 @@ export const getObservablesFromStorage: () => Promise<IObservable[]> = async () 
     return await Promise.all(observablePromises)
 }
 
-/** Возращает сохраненные коэффициенты */
+/** Возвращает сохраненные коэффициенты */
 export const getRandomOddsFromStorage: () => RandomOddStorage = () => JSON.parse(getFromStorage(randomOddStorage)) as RandomOddStorage
