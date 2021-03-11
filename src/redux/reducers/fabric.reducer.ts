@@ -1,8 +1,9 @@
-import {CHANGE_SELECTION, CHANGE_VPT} from '../actionTypes'
+import {CHANGE_SELECTION, CHANGE_VPT, UPLOAD_LAYER} from '../actionTypes'
 
 export type FabricState = {
     vptCoords: VptCoords
     selection: IDeletableFabric
+    uploadLayerURL: string
 }
 
 export interface ChangeVPTCoordsAction {
@@ -15,11 +16,17 @@ export interface ChangeSelectionAction {
     selection: IDeletableFabric
 }
 
-export type FabricObjectAction = ChangeSelectionAction | ChangeVPTCoordsAction
+export interface UploadLayerAction {
+    type: typeof UPLOAD_LAYER,
+    imgURL: string
+}
+
+export type FabricObjectAction = ChangeSelectionAction | ChangeVPTCoordsAction | UploadLayerAction
 
 const initialFabricState: FabricState = {
     selection: null,
-    vptCoords: null
+    vptCoords: null,
+    uploadLayerURL: null
 }
 
 const fabricStateReducer: (state: FabricState, action: FabricObjectAction) => FabricState = (state: FabricState = initialFabricState, action: FabricObjectAction) => {
@@ -33,6 +40,11 @@ const fabricStateReducer: (state: FabricState, action: FabricObjectAction) => Fa
             return {
                 ...state,
                 vptCoords: action.vptCoords
+            }
+        case UPLOAD_LAYER:
+            return {
+                ...state,
+                uploadLayerURL: action.imgURL
             }
         default:
             return state

@@ -14,6 +14,7 @@ interface StateProps {
     testObservable: IObservable
     observables: IObservable[]
     isTesting: boolean
+    imgURL: string
 }
 
 interface DispatchProps {
@@ -26,7 +27,8 @@ const mapStateToProps = (state: RootState) => {
         bsmList: state.lps.bsmList,
         testObservable: state.test.testObservable,
         isTesting: state.test.isTesting,
-        observables: state.lps.observables
+        observables: state.lps.observables,
+        imgURL: state.fabric.uploadLayerURL
     }
     return props
 }
@@ -112,6 +114,9 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
 
     /** static canvas id */
     const [CANVAS_ID] = useState<string>(`geo_zone_${Date.now()}`)
+
+    /** background image */
+    const [image, setImage] = useState<fabric.Image>(null)
 
     /** static canvas */
     const [canvas, setCanvas] = useState<Canvas>(null)
@@ -308,6 +313,25 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             canvas.renderAll()
         }
     }, [props.isTesting])
+
+    /** Установка подложки */
+    //todo
+    useEffect(() => {
+        if (props.imgURL) {
+            fabric.Image.fromURL(props.imgURL, (image: fabric.Image) => {
+                canvas.add(image)
+
+                setTimeout(() => {
+                    canvas.setBackgroundImage(image, () => {
+                        console.log('set image')
+                        canvas.remove(image)
+                        canvas.renderAll()
+                    })
+                }, 3000)
+            })
+        }
+
+    }, [props.imgURL])
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }

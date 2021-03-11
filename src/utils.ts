@@ -540,3 +540,13 @@ export const saveToStorage = (key: string, value: string) =>
 /** Получение данных из локального хранилища по ключу */
 export const getFromStorage = (key: string) =>
     localStorage.getItem(key)
+
+/** файл в base64 URL */
+export const rileToBase64URL = (file: File | Blob) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onerror = e => reject(e)
+        reader.onload = () => resolve(reader.result)
+    })
+}

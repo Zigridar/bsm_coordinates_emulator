@@ -19,7 +19,10 @@ import CreateObservableDialog from './CreateObservableDialog'
 import StatisticDialog from './StatisticDialog'
 import {RootState} from '../redux/store'
 import {
-    addBsm, addBsms, addObservables, addRandomOdds,
+    addBsm,
+    addBsms,
+    addObservables,
+    addRandomOdds,
     changeFraction,
     changeMinArea,
     changeMode,
@@ -28,6 +31,7 @@ import {
 } from '../redux/ActionCreators'
 import SaveBtn from './SaveFabricState'
 import {getBSMsFromStorage, getObservablesFromStorage, getRandomOddsFromStorage} from '../fabricUtils'
+import BackgroundImageDialog from "./BackImgDialog";
 
 interface OwnProps {
 
@@ -150,6 +154,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                 <LoadJSONDataDialog/>
                 <StatisticDialog/>
                 <SaveBtn/>
+                <BackgroundImageDialog/>
                 <LearningDialog/>
                 <Tooltip
                     title='Расстояние промаха'

@@ -22,7 +22,8 @@ import {
     DELETE_BSM,
     SET_LEARNING,
     SET_OBSERVABLE_COORDS,
-    UPDATE_REAL_POINT
+    UPDATE_REAL_POINT,
+    UPLOAD_LAYER
 } from './actionTypes'
 import {
     AddRandomOdds,
@@ -34,7 +35,7 @@ import {
 import {ChangeModeAction} from "./reducers/test.reducer"
 import {fabric} from "fabric"
 import {AddStatRows, RealPointUpdate, UpdateRealPointAction} from "./reducers/statistic.reducer"
-import {ChangeSelectionAction, ChangeVPTCoordsAction} from "./reducers/fabric.reducer"
+import {ChangeSelectionAction, ChangeVPTCoordsAction, UploadLayerAction} from "./reducers/fabric.reducer"
 
 export const addBsm = (bsm: BSM) => {
     const action: AddBSMAction = {
@@ -160,6 +161,14 @@ export const setObservableCoords = (statRows: StatisticRow[]) => {
     const action: SetObservableCoordsAction = {
         type: SET_OBSERVABLE_COORDS,
         statRows
+    }
+    return action
+}
+
+export const uploadBackground = (imgURL: string) => {
+    const action: UploadLayerAction = {
+        type: UPLOAD_LAYER,
+        imgURL
     }
     return action
 }
