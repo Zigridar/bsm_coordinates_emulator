@@ -5,7 +5,7 @@ import {UploadOutlined} from '@ant-design/icons'
 import {calcPointsByDataMap, parseLbsmData} from '../utils'
 import {connect} from 'react-redux'
 import {RootState} from "../redux/store"
-import {addStatRows} from '../redux/ActionCreators'
+import {addStatRows, changeMode, setObservableCoords} from '../redux/ActionCreators'
 
 interface OwnProps {
 
@@ -17,10 +17,13 @@ interface StateProps {
     odd: number
     area: number
     fraction: number
+    isTesting: boolean
 }
 
 interface DispatchProps {
     addStatRows: (statRows: StatisticRow[]) => void
+    setObservableCoords: (statRows: StatisticRow[]) => void
+    changeMode: (isTesting: boolean) => void
 }
 
 const mapStateToProps = (state: RootState) => {
@@ -29,13 +32,16 @@ const mapStateToProps = (state: RootState) => {
         observables: state.lps.observables,
         odd: state.random.randomOdd,
         area: state.random.minArea,
-        fraction: state.random.fraction
+        fraction: state.random.fraction,
+        isTesting: state.test.isTesting
     }
     return props
 }
 
 const mapDispatchToProps: DispatchProps = {
-        addStatRows
+    addStatRows,
+    setObservableCoords,
+    changeMode
 }
 
 type LoadJSONDataDialogProps = OwnProps & StateProps & DispatchProps
@@ -47,6 +53,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
     const [text, setText] = useState<string>('')
 
     const onCancel = () => {
+        setText(() => '')
         setModalVisible(() => false)
     }
 
@@ -104,7 +111,9 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
                 props.fraction
             )
 
+            props.changeMode(false)
             props.addStatRows(statisticRows)
+            props.setObservableCoords(statisticRows)
 
             onCancel()
         }
@@ -130,6 +139,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
                     shape={'circle'}
                     onClick={() => setModalVisible(() => true)}
                     icon={<UploadOutlined />}
+                    disabled={props.isTesting}
                 />
             </Tooltip>
             <Modal

@@ -3,7 +3,8 @@ import {
     AddBSMsAction,
     AddObservableAction,
     AddObservablesAction,
-    DeleteBSMAction
+    DeleteBSMAction,
+    SetObservableCoordsAction
 } from './reducers/lps.reducer'
 import {
     ADD_BSM,
@@ -20,6 +21,7 @@ import {
     CHANGE_VPT,
     DELETE_BSM,
     SET_LEARNING,
+    SET_OBSERVABLE_COORDS,
     UPDATE_REAL_POINT
 } from './actionTypes'
 import {
@@ -150,6 +152,14 @@ export const changeVPT = (vptCoords: VptCoords) => {
     const action: ChangeVPTCoordsAction = {
         type: CHANGE_VPT,
         vptCoords
+    }
+    return action
+}
+
+export const setObservableCoords = (statRows: StatisticRow[]) => {
+    const action: SetObservableCoordsAction = {
+        type: SET_OBSERVABLE_COORDS,
+        statRows
     }
     return action
 }

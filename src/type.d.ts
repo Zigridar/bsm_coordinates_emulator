@@ -97,6 +97,7 @@ type StatisticRow = {
 }
 
 type StatTableRow = {
+    index: number
     key: string
     imei: number
     calculated: string

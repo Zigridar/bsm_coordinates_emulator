@@ -1,11 +1,13 @@
 import React, {useState} from 'react'
 import {connect} from 'react-redux'
-import {Button, InputNumber, Modal, Table, Tooltip} from 'antd'
+import {Button, Col, InputNumber, Modal, Row, Statistic, Table, Tooltip} from 'antd'
 import {BarChartOutlined} from '@ant-design/icons'
-import {pointToString} from '../utils'
+import {calcErrors, pointToString} from '../utils'
 import {RootState} from '../redux/store'
 import {updateRealPoint} from '../redux/ActionCreators'
 import {RealPointUpdate} from '../redux/reducers/statistic.reducer'
+import {Simulate} from "react-dom/test-utils";
+import error = Simulate.error;
 
 
 interface OwnProps {
@@ -26,7 +28,6 @@ const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
         statData: state.statistic.statisticData
     }
-
     return props
 }
 
@@ -35,6 +36,11 @@ const mapDispatchToProps: DispatchProps = {
 }
 
 const columns = [
+    {
+        title: '',
+        dataIndex: 'index',
+        key: 'index'
+    },
     {
         title: 'IMEI',
         dataIndex: 'imei',
@@ -95,12 +101,107 @@ const EditRealPoint: React.FC<EditRealPointProps> = (props: EditRealPointProps) 
     )
 }
 
+interface InfoDialogProps {
+    rssiErrors: number[]
+    randomErrors: number[]
+}
+
+const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) => {
+    return(
+        <>
+            <Row>
+                <Col span={24}>
+                    <p>Расчет по RSSI</p>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dl'}
+                    >
+                        <Statistic
+                            value={props.rssiErrors[0]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dx'}
+                    >
+                        <Statistic
+                            value={props.rssiErrors[1]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dy'}
+                    >
+                        <Statistic
+                            value={props.rssiErrors[2]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+            </Row>
+            <Row>
+                <Col span={24}>
+                    <p>Случайная точка</p>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dl'}
+                    >
+                        <Statistic
+                            value={props.randomErrors[0]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dx'}
+                    >
+                        <Statistic
+                            value={props.randomErrors[1]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+                <Col span={8}>
+                    <Tooltip
+                        title={'dy'}
+                    >
+                        <Statistic
+                            value={props.randomErrors[2]}
+                            precision={2}
+                            suffix="м"
+                            prefix={<p>dy</p>}
+                        />
+                    </Tooltip>
+                </Col>
+            </Row>
+        </>
+    )
+}
+
 const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
 
     const [visible, setVisible] = useState<boolean>(false)
 
     const dataArr: StatTableRow[] = props.statData.map((data: StatisticRow, index: number) => {
         const rowData: StatTableRow = {
+            index: index + 1,
             key: `${index}`,
             imei: data.observableImei,
             calculated: pointToString(data.calcPoint),
@@ -110,6 +211,27 @@ const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
 
         return rowData
     })
+
+    const showErrors = () => {
+        const realAndCalc: [IPoint, IPoint][] = []
+        const realAndRandom: [IPoint, IPoint][] = []
+
+        props.statData.forEach((statRow: StatisticRow) => {
+            const { realPoint, calcPoint, randomPoint } = statRow
+            const real = { x: realPoint.x * 100, y: realPoint.y * 100 }
+            realAndCalc.push([real, calcPoint])
+            realAndRandom.push([real, randomPoint])
+        })
+
+        const rssiErrors = calcErrors(realAndCalc).map(error => error / 100)
+        const randomErrors = calcErrors(realAndRandom).map(error => error / 100)
+
+        Modal.info({
+            title: 'Погрешности',
+            content: <InfoDialogContent randomErrors={randomErrors} rssiErrors={rssiErrors} />,
+            width: '500px'
+        })
+    }
 
     return(
         <>
@@ -127,8 +249,10 @@ const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
                 width={'800px'}
                 title={'Statistic'}
                 visible={visible}
-                footer={null}
                 onCancel={() => setVisible(() => false)}
+                onOk={showErrors}
+                okButtonProps={{ disabled: props.statData.length === 0 }}
+                okText={'Рассчитать погрешности'}
             >
                 <Table
                     scroll={{y: 400}}

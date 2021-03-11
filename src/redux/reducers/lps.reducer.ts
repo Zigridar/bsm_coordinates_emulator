@@ -1,4 +1,5 @@
-import {ADD_BSM, ADD_BSMS, ADD_OBSERVABLE, ADD_OBSERVABLES, DELETE_BSM} from '../actionTypes'
+import {ADD_BSM, ADD_BSMS, ADD_OBSERVABLE, ADD_OBSERVABLES, DELETE_BSM, SET_OBSERVABLE_COORDS} from '../actionTypes'
+import {setCoords} from "../../utils";
 
 export type LpsState = {
     bsmList: BSM[]
@@ -30,7 +31,12 @@ export interface AddBSMsAction {
     bsms: BSM[]
 }
 
-export type LpsStateAction = AddBSMAction | DeleteBSMAction | AddObservableAction | AddBSMsAction | AddObservablesAction
+export interface SetObservableCoordsAction {
+    type: typeof SET_OBSERVABLE_COORDS,
+    statRows: StatisticRow[]
+}
+
+export type LpsStateAction = AddBSMAction | DeleteBSMAction | AddObservableAction | AddBSMsAction | AddObservablesAction | SetObservableCoordsAction
 
 const initialState: LpsState = {
     bsmList: [],
@@ -68,6 +74,21 @@ const lpsReducer: (state: LpsState, action: LpsStateAction) => LpsState = (state
             return {
                 ...state,
                 observables: [...state.observables, ...action.observables]
+            }
+        case SET_OBSERVABLE_COORDS:
+            action.statRows.forEach((statRow: StatisticRow) => {
+                const obs = state.observables.find(obs => obs.imei === statRow.observableImei)
+                try {
+                    setCoords(obs.calculatedPoint, statRow.calcPoint)
+                    setCoords(obs.fakePoint, statRow.randomPoint)
+                }
+                catch (e) {
+                    console.error(e)
+                }
+            })
+            return {
+                ...state,
+                observables: [...state.observables]
             }
         default:
             return state

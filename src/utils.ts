@@ -269,6 +269,10 @@ export const calcAndDrawFantom: (fantomObject: Object, bsms: BSM[], odd: number,
     return point
 }
 
+/** Расчет погрешностей
+ * Принимает [Реальное местоположение, Расчитанное метоположение]
+ * Возвращает (промах, средневкадратиченое отклонение по x, среднеквадратиченое отклонение по y)
+ * */
 export const calcErrors: (data: [IPoint, IPoint][]) => [number, number, number] = (data: [[IPoint, IPoint]]) => {
     const calculatedByEach = data
         .map((item: [IPoint, IPoint]) => {
@@ -527,7 +531,7 @@ export const calcPointsByDataMap: (dataMap: Map<[number, number], ReducedSu>, bs
     return resultRows
 }
 
-export const pointToString = (point: IPoint) => `x: ${point.x / 100}, y: ${point.y / 100}`
+export const pointToString = (point: IPoint) => `x: ${(point.x / 100).toFixed(2)}, y: ${(point.y / 100).toFixed(2)}`
 
 /** Сохранение в локальное хранилище по ключу */
 export const saveToStorage = (key: string, value: string) =>

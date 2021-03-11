@@ -2,7 +2,7 @@ import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
 import {bsmStorage, observableStorage, randomOddStorage, STATIST_POINT_COUNT} from './constants'
 import {calcAndDrawFantom, calcErrors, getFromStorage, setFakeRssi} from './utils'
-import store from "./redux/store"
+import store from './redux/store'
 
 type FantomShape = 'circle' | 'square'
 
@@ -28,15 +28,13 @@ const initFantomPoint: (color: string, imei: number, shape: FantomShape) => fabr
         originX: 'center'
     })
 
-    const group = new fabric.Group([pseudoPoint, imeiText], {
+    return new fabric.Group([pseudoPoint, imeiText], {
         selectable: false,
         hasControls: false,
         evented: false,
         left: 300,
         top: 300
     })
-
-    return group
 }
 
 export const initTestObservable = (imei: number) => {
