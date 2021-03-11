@@ -1,5 +1,5 @@
 import {Header} from 'antd/es/layout/layout'
-import React from 'react'
+import React, {useEffect} from 'react'
 import {connect} from 'react-redux'
 import {fabric} from 'fabric'
 import {Button, Slider, Space, Statistic, Switch, Tooltip} from 'antd'
@@ -17,15 +17,17 @@ import LearningDialog from './StartLearnDialog'
 import LoadJSONDataDialog from './LoadJSONDataDialog'
 import CreateObservableDialog from './CreateObservableDialog'
 import StatisticDialog from './StatisticDialog'
-import {RootState} from "../redux/store";
+import {RootState} from '../redux/store'
 import {
-    addBsmToCanvas,
+    addBsm, addBsms, addObservables, addRandomOdds,
     changeFraction,
     changeMinArea,
     changeMode,
     changeRandomOdd,
     deleteBSM
-} from "../redux/ActionCreators";
+} from '../redux/ActionCreators'
+import SaveBtn from './SaveFabricState'
+import {getBSMsFromStorage, getObservablesFromStorage, getRandomOddsFromStorage} from '../fabricUtils'
 
 interface OwnProps {
 
@@ -44,12 +46,15 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    addBsmToCanvas: (bsm: BSM) => void
+    addBsm: (bsm: BSM) => void
     deleteBSM: (deletable: IDeletableFabric) => void
     changeRandomOdd: (randomOdd: number) => void
     changeMinArea: (minArea: number) => void
     changeFraction: (fraction: number) => void
     changeMode: (isTest: boolean) => void
+    addBsms: (bsm: BSM[]) => void
+    addObservables: (observables: IObservable[]) => void
+    addRandomOdds: (rs: RandomOddStorage) => void
 }
 
 const mapStateToProps = (state: RootState) => {
@@ -68,17 +73,35 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    addBsmToCanvas: addBsmToCanvas,
-    deleteBSM: deleteBSM,
-    changeFraction: changeFraction,
-    changeRandomOdd: changeRandomOdd,
-    changeMinArea: changeMinArea,
-    changeMode: changeMode
+    addBsm,
+    deleteBSM,
+    changeFraction,
+    changeRandomOdd,
+    changeMinArea,
+    changeMode,
+    addBsms,
+    addObservables,
+    addRandomOdds
 }
 
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
+
+    /** При первой инициализации добавить БСМ из локального хранилища */
+    useEffect(() => {
+        /** Восстановление БСМ */
+        getBSMsFromStorage()
+            .then(props.addBsms)
+
+        /** Восстановление объектов наблюдения */
+        getObservablesFromStorage()
+            .then(props.addObservables)
+
+        const rs = getRandomOddsFromStorage()
+        if (rs)
+            props.addRandomOdds(rs)
+    }, [])
 
     const [dModule, dx, dy] = props.errors.map(error => error / 100)
 
@@ -90,7 +113,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     onChange={props.changeMode}
                 />
                 <CreateObservableDialog/>
-                <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} addBsmToCanvas={props.addBsmToCanvas} bsmList={props.bsmList}/>
+                <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} addBsmToCanvas={props.addBsm} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}
@@ -126,6 +149,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                 />
                 <LoadJSONDataDialog/>
                 <StatisticDialog/>
+                <SaveBtn/>
                 <LearningDialog/>
                 <Tooltip
                     title='Расстояние промаха'

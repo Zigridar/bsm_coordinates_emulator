@@ -32,8 +32,8 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    changeSelection: changeSelection,
-    changeVPT: changeVPT
+    changeSelection,
+    changeVPT
 }
 
 /** create canvas grid */

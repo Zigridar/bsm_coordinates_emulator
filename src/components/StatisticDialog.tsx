@@ -3,9 +3,9 @@ import {connect} from 'react-redux'
 import {Button, InputNumber, Modal, Table, Tooltip} from 'antd'
 import {BarChartOutlined} from '@ant-design/icons'
 import {pointToString} from '../utils'
-import {RootState} from "../redux/store"
-import {updateRealPoint} from "../redux/ActionCreators";
-import {RealPointUpdate} from "../redux/reducers/statistic.reducer";
+import {RootState} from '../redux/store'
+import {updateRealPoint} from '../redux/ActionCreators'
+import {RealPointUpdate} from '../redux/reducers/statistic.reducer'
 
 
 interface OwnProps {
@@ -31,7 +31,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    updateRealPoint: updateRealPoint
+    updateRealPoint
 }
 
 const columns = [

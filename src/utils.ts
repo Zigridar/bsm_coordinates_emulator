@@ -420,7 +420,6 @@ export const simplifyBSM: (bsms: BSM[]) => IBSM[] = (bsms: BSM[]) => {
     return bsms.map((bsm: BSM) => {
         const simpleBSM: IBSM = {
             rssi: bsm.rssi,
-            _rssi: bsm._rssi,
             staticCoords: bsm.staticCoords,
             _staticCoords: bsm._staticCoords,
             imei: bsm.imei
@@ -529,3 +528,11 @@ export const calcPointsByDataMap: (dataMap: Map<[number, number], ReducedSu>, bs
 }
 
 export const pointToString = (point: IPoint) => `x: ${point.x / 100}, y: ${point.y / 100}`
+
+/** Сохранение в локальное хранилище по ключу */
+export const saveToStorage = (key: string, value: string) =>
+    localStorage.setItem(key, value)
+
+/** Получение данных из локального хранилища по ключу */
+export const getFromStorage = (key: string) =>
+    localStorage.getItem(key)

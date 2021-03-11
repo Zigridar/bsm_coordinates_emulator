@@ -1,4 +1,4 @@
-import {ADD_BSM, ADD_OBSERVABLE, DELETE_BSM} from "../actionTypes"
+import {ADD_BSM, ADD_BSMS, ADD_OBSERVABLE, ADD_OBSERVABLES, DELETE_BSM} from '../actionTypes'
 
 export type LpsState = {
     bsmList: BSM[]
@@ -20,7 +20,17 @@ export interface AddObservableAction {
     observable: IObservable
 }
 
-export type LpsStateAction = AddBSMAction | DeleteBSMAction | AddObservableAction
+export interface AddObservablesAction {
+    type: typeof ADD_OBSERVABLES,
+    observables: IObservable[]
+}
+
+export interface AddBSMsAction {
+    type: typeof ADD_BSMS,
+    bsms: BSM[]
+}
+
+export type LpsStateAction = AddBSMAction | DeleteBSMAction | AddObservableAction | AddBSMsAction | AddObservablesAction
 
 const initialState: LpsState = {
     bsmList: [],
@@ -48,6 +58,16 @@ const lpsReducer: (state: LpsState, action: LpsStateAction) => LpsState = (state
             return {
                 ...state,
                 observables: [...state.observables, action.observable]
+            }
+        case ADD_BSMS:
+            return {
+                ...state,
+                bsmList: [...state.bsmList, ...action.bsms]
+            }
+        case ADD_OBSERVABLES:
+            return {
+                ...state,
+                observables: [...state.observables, ...action.observables]
             }
         default:
             return state

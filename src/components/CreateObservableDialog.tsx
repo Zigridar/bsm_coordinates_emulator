@@ -27,7 +27,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    addObservable: addObservable
+    addObservable
 }
 
 type CreateObservableDialogProps = OwnProps & StateProps & DispatchProps

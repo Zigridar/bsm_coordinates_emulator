@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-        addStatRows: addStatRows
+        addStatRows
 }
 
 type LoadJSONDataDialogProps = OwnProps & StateProps & DispatchProps

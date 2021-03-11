@@ -78,7 +78,6 @@ const createBsm = (
         rssi0,
         outsideImei,
         r0,
-        _rssi: 0,
         imei,
         object: group,
         _staticCoords: group.getCenterPoint(),
@@ -89,12 +88,7 @@ const createBsm = (
         setSelectable(selectable: boolean) {
             group.set({ selectable })
         },
-        set rssi(value: number) {
-            this._rssi = value
-        },
-        get rssi() {
-            return this._rssi
-        }
+        rssi: 0
     }
 
     return newBsm

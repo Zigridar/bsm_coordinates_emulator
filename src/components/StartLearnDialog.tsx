@@ -39,10 +39,10 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    changeFraction: changeFraction,
-    changeLearningMode: changeLearningMode,
-    changeMinArea: changeMinArea,
-    changeRandomOdd: changeRandomOdd
+    changeFraction,
+    changeLearningMode,
+    changeMinArea,
+    changeRandomOdd
 
 }
 

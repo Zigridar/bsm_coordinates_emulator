@@ -1,7 +1,16 @@
-import {AddBSMAction, AddObservableAction, DeleteBSMAction} from './reducers/lps.reducer'
+import {
+    AddBSMAction,
+    AddBSMsAction,
+    AddObservableAction,
+    AddObservablesAction,
+    DeleteBSMAction
+} from './reducers/lps.reducer'
 import {
     ADD_BSM,
+    ADD_BSMS,
     ADD_OBSERVABLE,
+    ADD_OBSERVABLES,
+    ADD_RANDOM_ODDS,
     ADD_STAT_ROWS,
     CHANGE_FRACTION,
     CHANGE_MIN_AREA,
@@ -14,6 +23,7 @@ import {
     UPDATE_REAL_POINT
 } from './actionTypes'
 import {
+    AddRandomOdds,
     ChangeFractionAction,
     ChangeLearningAction,
     ChangeMinAreaAction,
@@ -24,10 +34,18 @@ import {fabric} from "fabric"
 import {AddStatRows, RealPointUpdate, UpdateRealPointAction} from "./reducers/statistic.reducer"
 import {ChangeSelectionAction, ChangeVPTCoordsAction} from "./reducers/fabric.reducer"
 
-export const addBsmToCanvas = (bsm: BSM) => {
+export const addBsm = (bsm: BSM) => {
     const action: AddBSMAction = {
         type: ADD_BSM,
         bsm
+    }
+    return action
+}
+
+export const addBsms = (bsms: BSM[]) => {
+    const action: AddBSMsAction = {
+        type: ADD_BSMS,
+        bsms
     }
     return action
 }
@@ -64,6 +82,14 @@ export const changeMinArea = (minArea: number) => {
     return action
 }
 
+export const addRandomOdds = (randomOdds: RandomOddStorage) => {
+    const action: AddRandomOdds = {
+        type: ADD_RANDOM_ODDS,
+        randomOdds
+    }
+    return action
+}
+
 export const changeMode = (isTesting: boolean) => {
     const action: ChangeModeAction = {
         type: CHANGE_MODE,
@@ -76,6 +102,14 @@ export const addObservable = (observable: IObservable) => {
     const action: AddObservableAction = {
         type: ADD_OBSERVABLE,
         observable
+    }
+    return action
+}
+
+export const addObservables = (observables: IObservable[]) => {
+    const action: AddObservablesAction = {
+        type: ADD_OBSERVABLES,
+        observables
     }
     return action
 }

@@ -1,7 +1,7 @@
 import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
-import {STATIST_POINT_COUNT} from './constants'
-import {calcAndDrawFantom, calcErrors, setFakeRssi} from './utils'
+import {bsmStorage, observableStorage, randomOddStorage, STATIST_POINT_COUNT} from './constants'
+import {calcAndDrawFantom, calcErrors, getFromStorage, setFakeRssi} from './utils'
 import store from "./redux/store"
 
 type FantomShape = 'circle' | 'square'
@@ -89,10 +89,130 @@ export const initTestObservable = (imei: number) => {
 export const createObservable = (imei: number, fakePointColor: string, calcPointColor: string) => {
     const observable: IObservable = {
         imei,
-        fakePoint: initFantomPoint(fakePointColor, imei, "circle"),
-        calculatedPoint: initFantomPoint(calcPointColor, imei, "square"),
+        fakePoint: initFantomPoint(fakePointColor, imei, 'circle'),
+        calculatedPoint: initFantomPoint(calcPointColor, imei, 'square'),
         movableObject: null
     }
 
     return observable
 }
+
+/** Восстановление fabric объектов из  строки */
+export const parseFabricObjectFromString: (stringObject: any) => Promise<fabric.Object> = (stringObject: any) => {
+    return new Promise<fabric.Object>((resolve, reject) => {
+        try {
+            fabric.util.enlivenObjects([stringObject], (fabricObjects: fabric.Object[]) => {
+                resolve(fabricObjects[0])
+            }, 'fabric')
+        }
+        catch (e) {
+            reject(e)
+        }
+    })
+}
+
+/** Сериализация (stringify) IObservable */
+export const serializeObservable: (obs: IObservable) => string = (obs: IObservable) => {
+    const serializedObservable: SerializedObservable = {
+        imei: obs.imei,
+        calculatedPoint: obs.calculatedPoint.toJSON(),
+        fakePoint: obs.fakePoint.toJSON()
+    }
+    return JSON.stringify(serializedObservable)
+}
+
+/** Сериализация (stringify) BSM */
+export const serializeBSM: (bsm: BSM) => string = (bsm: BSM) => {
+    const serializedBSM: SerializedBSM = {
+        imei: bsm.imei,
+        outsideImei: bsm.outsideImei,
+        rssi0: bsm.rssi0,
+        r0: bsm.r0,
+        object: bsm.object.toJSON()
+    }
+    return JSON.stringify(serializedBSM)
+}
+
+export const deserializeObservable: (observableStr: string) => Promise<IObservable> = async (observableStr: string) => {
+    const serializedObservable = JSON.parse(observableStr) as SerializedObservable
+
+    const fakePoint = await parseFabricObjectFromString(serializedObservable.fakePoint)
+    const calculatedPoint = await parseFabricObjectFromString(serializedObservable.calculatedPoint)
+    fakePoint.set({ hasControls: false })
+    calculatedPoint.set({ hasControls: false })
+
+    const observable: IObservable = {
+        imei: serializedObservable.imei,
+        fakePoint,
+        calculatedPoint: await parseFabricObjectFromString(serializedObservable.calculatedPoint),
+        movableObject: null
+    }
+
+    return observable
+}
+
+export const deserializeBSM = async (bsmStr: string) => {
+    const serializedBSM = JSON.parse(bsmStr) as SerializedBSM
+
+    const group = await parseFabricObjectFromString(serializedBSM.object) as fabric.Group
+
+    const [, coordsTextObject, titleTextObject] = group.getObjects()
+
+    group.on('moving', () => {
+        const point = group.getCenterPoint();
+        const [x, y] = [point.x / 100, point.y / 100]
+        titleTextObject.set({ opacity: 0.1 });
+        (coordsTextObject as fabric.Text).set({text: `${x.toFixed(2)}, ${y.toFixed(2)}`, opacity: 1})
+    })
+
+    group.on('moved', () => {
+        titleTextObject.set({ opacity: 1 })
+        coordsTextObject.set({ opacity: 0.2 })
+    })
+
+    group.set({ hasControls: false })
+
+    const bsm: BSM = {
+        imei: serializedBSM.imei,
+        outsideImei: serializedBSM.outsideImei,
+        r0: serializedBSM.r0,
+        rssi0: serializedBSM.rssi0,
+        object: group,
+        _staticCoords: { x: 0, y: 0 },
+        rssi: 0,
+        setSelectable(selectable: boolean) {
+            group.set({ selectable })
+        },
+        get staticCoords() {
+            this._staticCoords = group.getCenterPoint()
+            return this._staticCoords
+        }
+    }
+
+    return bsm
+}
+
+/** Возвращает промис с BSM[] (десериализованными из локального хранилища)  */
+export const getBSMsFromStorage: () => Promise<BSM[]> = async () => {
+    const storageValue = JSON.parse(getFromStorage(bsmStorage)) as string[]
+
+    /** Если значение еще не задано вернуть пустой массив */
+    if (!storageValue) return []
+
+    const bsmPromises: Promise<BSM>[] = storageValue.map(bsmStr => deserializeBSM(bsmStr))
+    return await Promise.all(bsmPromises)
+}
+
+/** Возвращает проим с IObservable[] (десериализованными из локального хранилища) */
+export const getObservablesFromStorage: () => Promise<IObservable[]> = async () => {
+    const storageValue = JSON.parse(getFromStorage(observableStorage)) as string[]
+
+    /** Если значение еще не задано вернуть пустой массив */
+    if (!storageValue) return []
+
+    const observablePromises: Promise<IObservable>[] = storageValue.map(observableStr => deserializeObservable(observableStr))
+    return await Promise.all(observablePromises)
+}
+
+/** Возращает сохраненные коэффициенты */
+export const getRandomOddsFromStorage: () => RandomOddStorage = () => JSON.parse(getFromStorage(randomOddStorage)) as RandomOddStorage

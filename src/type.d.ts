@@ -1,5 +1,4 @@
 interface IBSM {
-    _rssi: number
     imei: number
     rssi: number
     _staticCoords: IPoint
@@ -103,4 +102,24 @@ type StatTableRow = {
     calculated: string
     random: string
     real: React.ReactNode
+}
+
+type SerializedObservable = {
+    imei: number
+    fakePoint: any
+    calculatedPoint: any
+}
+
+type SerializedBSM = {
+    object: any
+    rssi0: number
+    r0: number
+    outsideImei: number
+    imei: number
+}
+
+type RandomOddStorage = {
+    randomOdd: number
+    minArea: number
+    fraction: number
 }
