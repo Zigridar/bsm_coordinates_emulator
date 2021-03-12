@@ -14,7 +14,7 @@ interface StateProps {
     testObservable: IObservable
     observables: IObservable[]
     isTesting: boolean
-    imgURL: string
+    backgroundImage: fabric.Image
 }
 
 interface DispatchProps {
@@ -28,7 +28,7 @@ const mapStateToProps = (state: RootState) => {
         testObservable: state.test.testObservable,
         isTesting: state.test.isTesting,
         observables: state.lps.observables,
-        imgURL: state.fabric.uploadLayerURL
+        backgroundImage: state.fabric.uploadLayerURL
     }
     return props
 }
@@ -162,31 +162,6 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
             selection: false
         })
 
-        /** border restriction */
-        newCanvas.on('object:moving', (e: IEvent) => {
-            const target = e.target
-
-            const { tl, br } = newCanvas.vptCoords
-
-            const leftBorder = tl.x
-            const topBorder = tl.y
-            const rightBorder = br.x
-            const bottomBorder = br.y
-
-            if (target.left < leftBorder)
-                target.left = leftBorder
-
-            if (target.top < topBorder)
-                target.top = topBorder
-
-            if (target.width + target.left > rightBorder)
-                target.left = rightBorder - target.width
-
-            if (target.height + target.top > bottomBorder)
-                target.top = bottomBorder - target.height
-
-        })
-
         /** zoom */
         newCanvas.on('mouse:wheel', (event: IEvent & {e: WheelEvent}) => {
 
@@ -315,23 +290,19 @@ const GeoZoneMap: React.FC<GeoZoneMapProps> = (props: GeoZoneMapProps) => {
     }, [props.isTesting])
 
     /** Установка подложки */
-    //todo
     useEffect(() => {
-        if (props.imgURL) {
-            fabric.Image.fromURL(props.imgURL, (image: fabric.Image) => {
-                canvas.add(image)
-
-                setTimeout(() => {
-                    canvas.setBackgroundImage(image, () => {
-                        console.log('set image')
-                        canvas.remove(image)
-                        canvas.renderAll()
-                    })
-                }, 3000)
-            })
+        if (canvas) {
+            if (props.backgroundImage) {
+                canvas.add(props.backgroundImage)
+                setImage(() => props.backgroundImage)
+            }
+            else {
+                canvas.setBackgroundImage(image, () => {
+                    canvas.remove(image)
+                })
+            }
         }
-
-    }, [props.imgURL])
+    }, [props.backgroundImage])
 
     return(<canvas ref={ref} id={CANVAS_ID}/>)
 }

@@ -20,6 +20,7 @@ import {
     CHANGE_SELECTION,
     CHANGE_VPT,
     DELETE_BSM,
+    SAVE_BACKGROUND,
     SET_LEARNING,
     SET_OBSERVABLE_COORDS,
     UPDATE_REAL_POINT,
@@ -35,7 +36,12 @@ import {
 import {ChangeModeAction} from "./reducers/test.reducer"
 import {fabric} from "fabric"
 import {AddStatRows, RealPointUpdate, UpdateRealPointAction} from "./reducers/statistic.reducer"
-import {ChangeSelectionAction, ChangeVPTCoordsAction, UploadLayerAction} from "./reducers/fabric.reducer"
+import {
+    ChangeSelectionAction,
+    ChangeVPTCoordsAction,
+    SaveBackgroundAction,
+    UploadLayerAction
+} from "./reducers/fabric.reducer"
 
 export const addBsm = (bsm: BSM) => {
     const action: AddBSMAction = {
@@ -165,10 +171,17 @@ export const setObservableCoords = (statRows: StatisticRow[]) => {
     return action
 }
 
-export const uploadBackground = (imgURL: string) => {
+export const uploadBackground = (backgroundImage: fabric.Image) => {
     const action: UploadLayerAction = {
         type: UPLOAD_LAYER,
-        imgURL
+        backgroundImage
+    }
+    return action
+}
+
+export const saveBackground = () => {
+    const action: SaveBackgroundAction = {
+        type: SAVE_BACKGROUND
     }
     return action
 }

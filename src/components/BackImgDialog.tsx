@@ -1,33 +1,36 @@
 import React from 'react'
-import {Button, Tooltip, Upload} from 'antd'
-import {UploadOutlined} from '@ant-design/icons'
+import {Button, Space, Tooltip, Upload} from 'antd'
+import {SaveOutlined, UploadOutlined} from '@ant-design/icons'
 import {UploadChangeParam} from 'antd/lib/upload/interface'
-import {rileToBase64URL} from '../utils'
+import {fileToBase64URL} from '../utils'
 import {connect} from 'react-redux'
 import {RootState} from '../redux/store'
-import {uploadBackground} from '../redux/ActionCreators'
+import {saveBackground, uploadBackground} from '../redux/ActionCreators'
+import {fabric} from 'fabric'
 
 interface OwnProps {
 
 }
 
 interface StateProps {
-
+    backgroundImg: fabric.Image
 }
 
 interface DispatchProps {
-    uploadBackground: (imgURL: string) => void
+    uploadBackground: (image: fabric.Image) => void
+    saveBackground: () => void
 }
 
 const mapStateToProps = (state: RootState) => {
     const props: StateProps = {
-
+        backgroundImg: state.fabric.uploadLayerURL
     }
     return props
 }
 
 const mapDispatchToProps: DispatchProps = {
-    uploadBackground
+    uploadBackground,
+    saveBackground
 }
 
 type BackImgDialogProps = OwnProps & StateProps & DispatchProps
@@ -35,22 +38,46 @@ type BackImgDialogProps = OwnProps & StateProps & DispatchProps
 const BackImageDialog: React.FC<BackImgDialogProps> = (props: BackImgDialogProps) => {
 
     const onChange = (info: UploadChangeParam) => {
-        rileToBase64URL(info.file.originFileObj)
-            .then(props.uploadBackground)
+        fileToBase64URL(info.file.originFileObj)
+            .then((imgURL: string) => {
+                fabric.Image.fromURL(imgURL, (image: fabric.Image) => {
+                    props.uploadBackground(image)
+                })
+            })
     }
 
+    const onClick = () => props.saveBackground()
+
     return(
-        <Tooltip
-            title={'Загрузить подложку'}
+        <Space
+            size={'middle'}
         >
-            <Upload
-                onChange={onChange}
-            >
-                <Button
-                    icon={<UploadOutlined/>}
-                />
-            </Upload>
-        </Tooltip>
+            {!props.backgroundImg &&
+                <Tooltip
+                    title={'Загрузить подложку'}
+                >
+                    <Upload
+                        onChange={onChange}
+                    >
+                        <Button
+                            icon={<UploadOutlined/>}
+                        />
+                    </Upload>
+                </Tooltip>
+            }
+            {props.backgroundImg &&
+                <Tooltip
+                    title={'Сохранить положение подложки'}
+                >
+                    <Button
+                        size={'large'}
+                        shape={'circle'}
+                        icon={<SaveOutlined />}
+                        onClick={onClick}
+                    />
+                </Tooltip>
+            }
+        </Space>
     )
 }
 
