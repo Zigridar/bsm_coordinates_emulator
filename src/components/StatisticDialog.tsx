@@ -1,13 +1,12 @@
 import React, {useState} from 'react'
 import {connect} from 'react-redux'
-import {Button, Col, InputNumber, Modal, Row, Statistic, Table, Tooltip} from 'antd'
+import {Button, Checkbox, Col, InputNumber, Modal, Row, Statistic, Table, Tooltip} from 'antd'
 import {BarChartOutlined} from '@ant-design/icons'
 import {calcErrors, pointToString} from '../utils'
 import {RootState} from '../redux/store'
-import {updateRealPoint} from '../redux/ActionCreators'
-import {RealPointUpdate} from '../redux/reducers/statistic.reducer'
-import {Simulate} from "react-dom/test-utils";
-import error = Simulate.error;
+import {setValidRow, updateRealPoint} from '../redux/ActionCreators'
+import {RealPointUpdate, SetValid} from '../redux/reducers/statistic.reducer'
+import {CheckboxChangeEvent} from 'antd/lib/checkbox'
 
 
 interface OwnProps {
@@ -20,6 +19,7 @@ interface StateProps {
 
 interface DispatchProps {
     updateRealPoint: (update: RealPointUpdate) => void
+    setValidRow: (valid: SetValid) => void
 }
 
 type DialogProps = OwnProps & StateProps & DispatchProps
@@ -32,7 +32,8 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps: DispatchProps = {
-    updateRealPoint
+    updateRealPoint,
+    setValidRow
 }
 
 const columns = [
@@ -40,6 +41,11 @@ const columns = [
         title: '',
         dataIndex: 'index',
         key: 'index'
+    },
+    {
+        title: 'isValid',
+        dataIndex: 'toggleValid',
+        key: 'toggleValid'
     },
     {
         title: 'IMEI',
@@ -121,7 +127,7 @@ const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) =>
                             value={props.rssiErrors[0]}
                             precision={2}
                             suffix="м"
-                            prefix={<p>dy</p>}
+                            prefix={<p>dl</p>}
                         />
                     </Tooltip>
                 </Col>
@@ -133,7 +139,7 @@ const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) =>
                             value={props.rssiErrors[1]}
                             precision={2}
                             suffix="м"
-                            prefix={<p>dy</p>}
+                            prefix={<p>dx</p>}
                         />
                     </Tooltip>
                 </Col>
@@ -162,7 +168,7 @@ const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) =>
                             value={props.randomErrors[0]}
                             precision={2}
                             suffix="м"
-                            prefix={<p>dy</p>}
+                            prefix={<p>dl</p>}
                         />
                     </Tooltip>
                 </Col>
@@ -174,7 +180,7 @@ const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) =>
                             value={props.randomErrors[1]}
                             precision={2}
                             suffix="м"
-                            prefix={<p>dy</p>}
+                            prefix={<p>dx</p>}
                         />
                     </Tooltip>
                 </Col>
@@ -195,12 +201,29 @@ const InfoDialogContent: React.FC<InfoDialogProps> = (props: InfoDialogProps) =>
     )
 }
 
+
+interface SetValidCheckProps {
+    index: number
+    setValid: (valid: SetValid) => void
+    valid: boolean
+}
+
+const SetValidRow: React.FC<SetValidCheckProps> = (props: SetValidCheckProps) => {
+    return(
+        <Checkbox
+            checked={props.valid}
+            onChange={(e: CheckboxChangeEvent) => {props.setValid([e.target.checked, props.index])}}
+        />
+    )
+}
+
 const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
 
     const [visible, setVisible] = useState<boolean>(false)
 
     const dataArr: StatTableRow[] = props.statData.map((data: StatisticRow, index: number) => {
         const rowData: StatTableRow = {
+            toggleValid: <SetValidRow valid={data.isValid} index={index} setValid={props.setValidRow}/>,
             index: index + 1,
             key: `${index}`,
             imei: data.observableImei,
@@ -216,7 +239,7 @@ const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
         const realAndCalc: [IPoint, IPoint][] = []
         const realAndRandom: [IPoint, IPoint][] = []
 
-        props.statData.forEach((statRow: StatisticRow) => {
+        props.statData.filter((statRow: StatisticRow) => statRow.isValid).forEach((statRow: StatisticRow) => {
             const { realPoint, calcPoint, randomPoint } = statRow
             const real = { x: realPoint.x * 100, y: realPoint.y * 100 }
             realAndCalc.push([real, calcPoint])

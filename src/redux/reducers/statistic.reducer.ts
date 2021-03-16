@@ -1,4 +1,4 @@
-import {ADD_STAT_POINTS, ADD_STAT_ROWS, CHANGE_ERRORS, UPDATE_REAL_POINT} from "../actionTypes";
+import {ADD_STAT_POINTS, ADD_STAT_ROWS, CHANGE_ERRORS, SET_VALID_ROW, UPDATE_REAL_POINT} from "../actionTypes";
 
 export type StatisticState = {
     statisticData: StatisticRow[]
@@ -28,7 +28,14 @@ export interface UpdateRealPointAction {
     update: RealPointUpdate
 }
 
-export type StatisticAction = AddStatRows | ChangeErrors | AddStatPoints | UpdateRealPointAction
+export type SetValid = [boolean, number]
+
+export interface SetValidRow {
+    type: typeof SET_VALID_ROW,
+    valid: SetValid
+}
+
+export type StatisticAction = AddStatRows | ChangeErrors | AddStatPoints | UpdateRealPointAction | SetValidRow
 
 const initialStatisticState: StatisticState = {
     errors: [0, 0, 0],
@@ -56,6 +63,13 @@ const statisticReducer = (state: StatisticState = initialStatisticState, action:
         case UPDATE_REAL_POINT:
             const [point, index] = action.update
             state.statisticData[index].realPoint = point
+            return {
+                ...state,
+                statisticData: [...state.statisticData]
+            }
+        case SET_VALID_ROW:
+            const [isValid, idx] = action.valid
+            state.statisticData[idx].isValid = isValid
             return {
                 ...state,
                 statisticData: [...state.statisticData]

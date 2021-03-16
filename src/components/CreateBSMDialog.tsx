@@ -6,7 +6,7 @@ import {ColorResult, SketchPicker} from 'react-color'
 
 
 type CreateBSMDialogProps = {
-    addBsmToCanvas: (bsm: BSM) => void
+    createBsm: (bsm: BSM) => void
     canCreate: () => boolean
     bsmList: BSM[]
 }
@@ -110,9 +110,9 @@ const CreateBSMDialog: React.FC<CreateBSMDialogProps> = (props: CreateBSMDialogP
     const onCancel: () => void = () => setModalVisible(() => false)
 
     const onOk: () => void = () => {
-        if (!props.bsmList.find((bsm: BSM) => bsm.imei === dialogStorage.imei)) {
+        if (!props.bsmList.find((bsm: BSM) => bsm.imei === dialogStorage.imei && bsm.outsideImei === dialogStorage.outsideImei)) {
             setModalVisible(() => false)
-            props.addBsmToCanvas(createBsm(
+            props.createBsm(createBsm(
                 dialogStorage.imei,
                 dialogStorage.color,
                 dialogStorage.point,

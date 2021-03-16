@@ -117,7 +117,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
                     onChange={props.changeMode}
                 />
                 <CreateObservableDialog/>
-                <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} addBsmToCanvas={props.addBsm} bsmList={props.bsmList}/>
+                <CreateBSMDialog canCreate={() => !props.isLearning && props.isTest} createBsm={props.addBsm} bsmList={props.bsmList}/>
                 <Button
                     danger={true}
                     shape={'circle'}

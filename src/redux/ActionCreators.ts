@@ -23,6 +23,7 @@ import {
     SAVE_BACKGROUND,
     SET_LEARNING,
     SET_OBSERVABLE_COORDS,
+    SET_VALID_ROW,
     UPDATE_REAL_POINT,
     UPLOAD_LAYER
 } from './actionTypes'
@@ -35,7 +36,7 @@ import {
 } from "./reducers/random.reducer"
 import {ChangeModeAction} from "./reducers/test.reducer"
 import {fabric} from "fabric"
-import {AddStatRows, RealPointUpdate, UpdateRealPointAction} from "./reducers/statistic.reducer"
+import {AddStatRows, RealPointUpdate, SetValid, SetValidRow, UpdateRealPointAction} from "./reducers/statistic.reducer"
 import {
     ChangeSelectionAction,
     ChangeVPTCoordsAction,
@@ -135,6 +136,14 @@ export const updateRealPoint = (update: RealPointUpdate) => {
     const action: UpdateRealPointAction = {
         type: UPDATE_REAL_POINT,
         update
+    }
+    return action
+}
+
+export const setValidRow = (valid: SetValid) => {
+    const action: SetValidRow = {
+        type: SET_VALID_ROW,
+        valid
     }
     return action
 }

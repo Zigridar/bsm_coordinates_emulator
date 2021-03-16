@@ -432,12 +432,15 @@ export const simplifyBSM: (bsms: BSM[]) => IBSM[] = (bsms: BSM[]) => {
     })
 }
 
-export const parseLbsmData: (jsonData: string) => LbsmData = (jsonData: string) => {
+export const parseLbsmData: (dataStr: string) => [number, LbsmData] = (dataStr: string) => {
     try {
-        return JSON.parse(jsonData) as LbsmData
+        //todo костыли из-за ошибок в аиске
+        const outsideImei = parseInt(dataStr[20], 10)
+        const preparedStr = dataStr.slice(34).replace('"pressure:"', '"pressure":')
+        return [outsideImei, JSON.parse(preparedStr) as LbsmData]
     }
     catch (e) {
-        return null as LbsmData
+        return [-1, null as LbsmData]
     }
 }
 
@@ -519,6 +522,7 @@ export const calcPointsByDataMap: (dataMap: Map<[number, number], ReducedSu>, bs
 
         /** realPoint заполняется вручную */
         const statRow: StatisticRow = {
+            isValid: true,
             observableImei,
             calcPoint,
             randomPoint,

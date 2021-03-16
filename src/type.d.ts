@@ -90,6 +90,7 @@ type LbsmData = {
 } | null
 
 type StatisticRow = {
+    isValid: boolean
     observableImei: number
     calcPoint: IPoint
     randomPoint: IPoint
@@ -97,6 +98,7 @@ type StatisticRow = {
 }
 
 type StatTableRow = {
+    toggleValid: React.ReactNode
     index: number
     key: string
     imei: number

@@ -58,7 +58,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
     }
 
     const onOk = () => {
-        const parsedData = parseLbsmData(text)
+        const [outsideImei, parsedData] = parseLbsmData(text)
         if (parsedData) {
 
             const dataMap: Map<[number, number], ReducedSu> = new Map<[number, number], ReducedSu>()
@@ -80,7 +80,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
                     notFoundObservables.add(value.id)
 
                 value.iuList.forEach(iu => {
-                    if (!props.bsmList.find(bsm => bsm.imei === iu.id)) {
+                    if (!props.bsmList.find(bsm => bsm.imei === iu.id && bsm.outsideImei === outsideImei)) {
                         notFoundBsms.add(iu.id)
                     }
                 })
@@ -89,7 +89,7 @@ const LoadJSONDataDialog: React.FC<LoadJSONDataDialogProps> = (props: LoadJSONDa
             notFoundBsms.forEach(item => {
                 Modal.error({
                     title: 'Ошибка',
-                    content: `БСМ с imei: ${item} не найдена`
+                    content: `БСМ с imei: ${item} не найдена для внешнего блока ${outsideImei}`
                 })
             })
 
