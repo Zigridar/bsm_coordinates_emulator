@@ -11,7 +11,7 @@ import {
     MAX_TRIANGLE_AREA,
     MIN_FRACTION,
     MIN_RANDOM_ODD,
-    MIN_TRIANGLE_AREA
+    MIN_TRIANGLE_AREA, statisticStorage
 } from '../constants'
 import LearningDialog from './StartLearnDialog'
 import LoadJSONDataDialog from './LoadJSONDataDialog'
@@ -22,7 +22,7 @@ import {
     addBsm,
     addBsms,
     addObservables,
-    addRandomOdds,
+    addRandomOdds, addStatRows,
     changeFraction,
     changeMinArea,
     changeMode,
@@ -32,6 +32,7 @@ import {
 import SaveBtn from './SaveFabricState'
 import {getBSMsFromStorage, getObservablesFromStorage, getRandomOddsFromStorage} from '../fabricUtils'
 import BackgroundImageDialog from "./BackImgDialog";
+import {getFromStorage} from "../utils";
 
 interface OwnProps {
 
@@ -58,7 +59,8 @@ interface DispatchProps {
     changeMode: (isTest: boolean) => void
     addBsms: (bsm: BSM[]) => void
     addObservables: (observables: IObservable[]) => void
-    addRandomOdds: (rs: RandomOddStorage) => void
+    addRandomOdds: (rs: RandomOddStorage) => void,
+    addStatRows: (statRows: StatisticRow[]) => void
 }
 
 const mapStateToProps = (state: RootState) => {
@@ -85,7 +87,8 @@ const mapDispatchToProps: DispatchProps = {
     changeMode,
     addBsms,
     addObservables,
-    addRandomOdds
+    addRandomOdds,
+    addStatRows
 }
 
 type CommandHeaderProps = OwnProps & StateProps & DispatchProps
@@ -105,6 +108,11 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
         const rs = getRandomOddsFromStorage()
         if (rs)
             props.addRandomOdds(rs)
+
+        const statData = JSON.parse(getFromStorage(statisticStorage)) as StatisticRow[]
+        if (statData)
+            props.addStatRows(statData)
+
     }, [])
 
     const [dModule, dx, dy] = props.errors.map(error => error / 100)

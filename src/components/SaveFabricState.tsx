@@ -5,7 +5,7 @@ import {connect} from 'react-redux'
 import {RootState} from '../redux/store'
 import {serializeBSM, serializeObservable} from '../fabricUtils'
 import {saveToStorage} from '../utils'
-import {bsmStorage, observableStorage, randomOddStorage} from '../constants'
+import {bsmStorage, observableStorage, randomOddStorage, statisticStorage} from '../constants'
 
 interface OwnProps {
 
@@ -14,6 +14,7 @@ interface OwnProps {
 interface StateProps {
     observables: IObservable[]
     bsmList: BSM[]
+    statisticData: StatisticRow[]
     randomOdd: number
     minArea: number
     fraction: number
@@ -29,7 +30,8 @@ const mapStateToProps = (state: RootState) => {
         bsmList: state.lps.bsmList,
         randomOdd: state.random.randomOdd,
         minArea: state.random.minArea,
-        fraction: state.random.fraction
+        fraction: state.random.fraction,
+        statisticData: state.statistic.statisticData
     }
     return props
 }
@@ -48,6 +50,7 @@ const SaveBTN: React.FC<SaveBTNProps> = (props: SaveBTNProps) => {
         const serializedObservables = props.observables.map(observable => serializeObservable(observable))
         saveToStorage(bsmStorage, JSON.stringify(serializedBSMs))
         saveToStorage(observableStorage, JSON.stringify(serializedObservables))
+        saveToStorage(statisticStorage, JSON.stringify(props.statisticData))
 
         const randomStorage: RandomOddStorage = {
             fraction: props.fraction,

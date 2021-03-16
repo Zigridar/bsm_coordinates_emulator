@@ -8,3 +8,4 @@ export const STATIST_POINT_COUNT: number = 100
 export const bsmStorage: string = 'bsmStorage'
 export const observableStorage: string = 'observableStorage'
 export const randomOddStorage: string = 'randomOddStorage'
+export const statisticStorage: string = 'statisticStorage'
