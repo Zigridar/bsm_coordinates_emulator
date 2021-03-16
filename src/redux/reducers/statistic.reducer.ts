@@ -1,4 +1,11 @@
-import {ADD_STAT_POINTS, ADD_STAT_ROWS, CHANGE_ERRORS, SET_VALID_ROW, UPDATE_REAL_POINT} from "../actionTypes";
+import {
+    ADD_STAT_POINTS,
+    ADD_STAT_ROWS,
+    CHANGE_ERRORS,
+    DELETE_STAT_ROW,
+    SET_VALID_ROW,
+    UPDATE_REAL_POINT
+} from "../actionTypes";
 
 export type StatisticState = {
     statisticData: StatisticRow[]
@@ -35,7 +42,12 @@ export interface SetValidRow {
     valid: SetValid
 }
 
-export type StatisticAction = AddStatRows | ChangeErrors | AddStatPoints | UpdateRealPointAction | SetValidRow
+export interface DeleteStatRow {
+    type: typeof DELETE_STAT_ROW,
+    index: number
+}
+
+export type StatisticAction = AddStatRows | ChangeErrors | AddStatPoints | UpdateRealPointAction | SetValidRow | DeleteStatRow
 
 const initialStatisticState: StatisticState = {
     errors: [0, 0, 0],
@@ -73,6 +85,11 @@ const statisticReducer = (state: StatisticState = initialStatisticState, action:
             return {
                 ...state,
                 statisticData: [...state.statisticData]
+            }
+        case DELETE_STAT_ROW:
+            return {
+                ...state,
+                statisticData: state.statisticData.filter((row: StatisticRow, index: number) => index !== action.index)
             }
         default:
             return state

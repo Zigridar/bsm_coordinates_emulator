@@ -99,6 +99,7 @@ type StatisticRow = {
 
 type StatTableRow = {
     toggleValid: React.ReactNode
+    deleteBtn: React.ReactNode
     index: number
     key: string
     imei: number

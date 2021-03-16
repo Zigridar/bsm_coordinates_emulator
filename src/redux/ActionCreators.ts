@@ -20,6 +20,7 @@ import {
     CHANGE_SELECTION,
     CHANGE_VPT,
     DELETE_BSM,
+    DELETE_STAT_ROW,
     SAVE_BACKGROUND,
     SET_LEARNING,
     SET_OBSERVABLE_COORDS,
@@ -36,7 +37,14 @@ import {
 } from "./reducers/random.reducer"
 import {ChangeModeAction} from "./reducers/test.reducer"
 import {fabric} from "fabric"
-import {AddStatRows, RealPointUpdate, SetValid, SetValidRow, UpdateRealPointAction} from "./reducers/statistic.reducer"
+import {
+    AddStatRows,
+    DeleteStatRow,
+    RealPointUpdate,
+    SetValid,
+    SetValidRow,
+    UpdateRealPointAction
+} from "./reducers/statistic.reducer"
 import {
     ChangeSelectionAction,
     ChangeVPTCoordsAction,
@@ -144,6 +152,14 @@ export const setValidRow = (valid: SetValid) => {
     const action: SetValidRow = {
         type: SET_VALID_ROW,
         valid
+    }
+    return action
+}
+
+export const deleteStatisticRow = (index: number) => {
+    const action: DeleteStatRow = {
+        type: DELETE_STAT_ROW,
+        index
     }
     return action
 }

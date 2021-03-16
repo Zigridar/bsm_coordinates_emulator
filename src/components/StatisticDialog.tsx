@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
 import {connect} from 'react-redux'
 import {Button, Checkbox, Col, InputNumber, Modal, Row, Statistic, Table, Tooltip} from 'antd'
-import {BarChartOutlined} from '@ant-design/icons'
+import {BarChartOutlined, DeleteOutlined} from '@ant-design/icons'
 import {calcErrors, pointToString} from '../utils'
 import {RootState} from '../redux/store'
-import {setValidRow, updateRealPoint} from '../redux/ActionCreators'
+import {deleteStatisticRow, setValidRow, updateRealPoint} from '../redux/ActionCreators'
 import {RealPointUpdate, SetValid} from '../redux/reducers/statistic.reducer'
 import {CheckboxChangeEvent} from 'antd/lib/checkbox'
 
@@ -19,7 +19,8 @@ interface StateProps {
 
 interface DispatchProps {
     updateRealPoint: (update: RealPointUpdate) => void
-    setValidRow: (valid: SetValid) => void
+    setValidRow: (valid: SetValid) => void,
+    deleteStatisticRow: (index: number) => void
 }
 
 type DialogProps = OwnProps & StateProps & DispatchProps
@@ -33,7 +34,8 @@ const mapStateToProps = (state: RootState) => {
 
 const mapDispatchToProps: DispatchProps = {
     updateRealPoint,
-    setValidRow
+    setValidRow,
+    deleteStatisticRow
 }
 
 const columns = [
@@ -46,6 +48,11 @@ const columns = [
         title: 'isValid',
         dataIndex: 'toggleValid',
         key: 'toggleValid'
+    },
+    {
+        title: 'Delete',
+        dataIndex: 'deleteBtn',
+        key: 'deleteBtn'
     },
     {
         title: 'IMEI',
@@ -217,12 +224,29 @@ const SetValidRow: React.FC<SetValidCheckProps> = (props: SetValidCheckProps) =>
     )
 }
 
+interface DeleteRowProps {
+    deleteRow: (index: number) => void
+    index: number
+}
+
+const DeleteRow: React.FC<DeleteRowProps> = (props: DeleteRowProps) => {
+    return(
+        <Button
+            shape={"round"}
+            onClick={() => props.deleteRow(props.index)}
+            icon={<DeleteOutlined/>}
+            size={"small"}
+        />
+    )
+}
+
 const StatDialog: React.FC<DialogProps> = (props: DialogProps) => {
 
     const [visible, setVisible] = useState<boolean>(false)
 
     const dataArr: StatTableRow[] = props.statData.map((data: StatisticRow, index: number) => {
         const rowData: StatTableRow = {
+            deleteBtn: <DeleteRow index={index} deleteRow={props.deleteStatisticRow}/>,
             toggleValid: <SetValidRow valid={data.isValid} index={index} setValid={props.setValidRow}/>,
             index: index + 1,
             key: `${index}`,
