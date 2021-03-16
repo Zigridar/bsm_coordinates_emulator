@@ -436,7 +436,7 @@ export const parseLbsmData: (dataStr: string) => [number, LbsmData] = (dataStr: 
     try {
         //todo костыли из-за ошибок в аиске
         const outsideImei = parseInt(dataStr[20], 10)
-        const preparedStr = dataStr.slice(34).replace('"pressure:"', '"pressure":')
+        const preparedStr = dataStr.slice(34).replace(/"pressure:"/g, '"pressure":')
         return [outsideImei, JSON.parse(preparedStr) as LbsmData]
     }
     catch (e) {
