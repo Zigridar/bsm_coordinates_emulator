@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -c ./client/webpack.config.js",
-    "dev": "webpack serve -c ./client/webpack.config.js",
-    "build:back": "tsc"
+    "build:front": "webpack -c ./client/webpack.config.js",
+    "build:back": "tsc",
+    "build": "npm run build:back && npm run build:front",
+    "dev:front": "webpack serve -c ./client/webpack.config.js"
   },
   "keywords": [],
   "author": "",
