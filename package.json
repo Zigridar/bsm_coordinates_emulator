@@ -4,16 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack serve"
+    "build": "webpack -c ./client/webpack.config.js",
+    "dev": "webpack serve -c ./client/webpack.config.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@ant-design/icons": "^4.5.0",
-    "@types/fabric": "^4.2.2",
-    "@types/react-redux": "^7.1.16",
     "antd": "^4.12.3",
     "fabric": "^4.3.1",
     "html-webpack-plugin": "^4.5.1",
@@ -25,6 +23,8 @@
     "redux": "^4.0.5"
   },
   "devDependencies": {
+    "@types/fabric": "^4.2.2",
+    "@types/react-redux": "^7.1.16",
     "@types/lodash": "^4.14.168",
     "@types/react": "^17.0.2",
     "@types/react-color": "^3.0.4",
