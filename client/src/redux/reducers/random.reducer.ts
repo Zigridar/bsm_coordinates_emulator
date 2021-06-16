@@ -1,4 +1,5 @@
 import {ADD_RANDOM_ODDS, CHANGE_FRACTION, CHANGE_MIN_AREA, CHANGE_RANDOM_ODD, SET_LEARNING} from '../actionTypes'
+import {RandomOddStorage} from '../../../../src/commod_types/type'
 
 
 export type RandomState = {

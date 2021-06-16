@@ -1,5 +1,6 @@
 import {ADD_BSM, ADD_BSMS, ADD_OBSERVABLE, ADD_OBSERVABLES, DELETE_BSM, SET_OBSERVABLE_COORDS} from '../actionTypes'
-import {setCoords} from "../../utils";
+import {setCoords} from '../../utils'
+import {BSM, IDeletableFabric, IObservable, StatisticRow} from '../../../../src/commod_types/type'
 
 export type LpsState = {
     bsmList: BSM[]

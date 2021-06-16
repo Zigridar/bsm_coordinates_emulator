@@ -1,5 +1,6 @@
 import {CHANGE_MODE} from '../actionTypes'
 import {initTestObservable} from '../../fabricUtils'
+import {IObservable} from '../../../../src/commod_types/type'
 
 export type TestState = {
     isTesting: boolean

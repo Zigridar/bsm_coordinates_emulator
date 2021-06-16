@@ -15,7 +15,11 @@ module.exports = {
         children: true
     },
     devServer: {
-        port: 3000
+        port: 3000,
+        proxy: {
+            context: () => true,
+            target: 'http://localhost:8080',
+        }
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.css']

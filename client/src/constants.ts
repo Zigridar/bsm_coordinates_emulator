@@ -5,7 +5,5 @@ export const MAX_FRACTION: number = 0.01
 export const MIN_TRIANGLE_AREA: number = 1
 export const MAX_TRIANGLE_AREA: number = 10000
 export const STATIST_POINT_COUNT: number = 100
-export const bsmStorage: string = 'bsmStorage'
-export const observableStorage: string = 'observableStorage'
 export const randomOddStorage: string = 'randomOddStorage'
 export const statisticStorage: string = 'statisticStorage'

@@ -6,6 +6,7 @@ import {
     SET_VALID_ROW,
     UPDATE_REAL_POINT
 } from "../actionTypes";
+import {IPoint, StatisticRow} from '../../../../src/commod_types/type'
 
 export type StatisticState = {
     statisticData: StatisticRow[]

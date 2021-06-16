@@ -1,11 +1,11 @@
-interface IBSM {
+export interface IBSM {
     imei: number
     rssi: number
     _staticCoords: IPoint
     staticCoords: IPoint
 }
 
-type BSM = {
+export type BSM = {
     setSelectable: (selectable: boolean) => void
     object: IDeletableFabric
     rssi0: number
@@ -13,18 +13,18 @@ type BSM = {
     outsideImei: number
 } & IBSM
 
-interface IObservable {
+export interface IObservable {
     imei: number
     movableObject: fabric.Object | null
     fakePoint: fabric.Object
     calculatedPoint: fabric.Object | null
 }
 
-type IDeletableFabric = fabric.Object & {
+export type IDeletableFabric = fabric.Object & {
     forDelete?: boolean
 }
 
-type MessageFromMainThread = {
+export type MessageFromMainThread = {
     type: string
     bsms: IBSM[]
     steps: LearnSteps
@@ -34,33 +34,33 @@ type MessageFromMainThread = {
     maxY: number
 }
 
-type MessageFromLearnWorker = {
+export type MessageFromLearnWorker = {
     type: string
     progress?: number
     result?: [number, number, number]
 }
 
 /** Общий интерфейс, описывающий координаты точки */
-interface IPoint {
+export interface IPoint {
     x: number
     y: number
 }
 
-type LearnSteps = {
+export type LearnSteps = {
     fractionStep: number
     triangleAreaStep: number
     randomOddStep: number
     learnPointCount: number
 }
 
-type VptCoords = {
+export type VptCoords = {
     tl: IPoint
     tr: IPoint
     bl: IPoint
     br: IPoint
 }
 
-type FullSu = {
+export type FullSu = {
     syncSign: boolean
     levelOfMotorActivity: number
     alarm: boolean
@@ -69,19 +69,19 @@ type FullSu = {
     accelerometerSignal: string
 } & ReducedSu
 
-type ReducedSu = {
+export type ReducedSu = {
     id: number
     suReceivingTime: number
     iuList: IuData[]
 }
 
-type IuData = {
+export type IuData = {
     rssi: number
     nois: number
     id: number
 }
 
-type LbsmData = {
+export type LbsmData = {
     receivingTime: number
     receivingNois: number
     reducedSuList: ReducedSu[]
@@ -89,15 +89,7 @@ type LbsmData = {
     fullSuList: FullSu[]
 } | null
 
-type StatisticRow = {
-    isValid: boolean
-    observableImei: number
-    calcPoint: IPoint
-    randomPoint: IPoint
-    realPoint: IPoint
-}
-
-type StatTableRow = {
+export type StatTableRow = {
     toggleValid: React.ReactNode
     deleteBtn: React.ReactNode
     index: number
@@ -108,13 +100,21 @@ type StatTableRow = {
     real: React.ReactNode
 }
 
-type SerializedObservable = {
-    imei: number
-    fakePoint: any
-    calculatedPoint: any
+export type RandomOddStorage = {
+    randomOdd: number
+    minArea: number
+    fraction: number
 }
 
-type SerializedBSM = {
+export interface StatisticRow {
+    isValid: boolean
+    observableImei: number
+    calcPoint: IPoint
+    randomPoint: IPoint
+    realPoint: IPoint
+}
+
+export interface IModelIBsm {
     object: any
     rssi0: number
     r0: number
@@ -122,8 +122,10 @@ type SerializedBSM = {
     imei: number
 }
 
-type RandomOddStorage = {
-    randomOdd: number
-    minArea: number
-    fraction: number
+export interface IModelStatistic {
+    isValid: boolean
+    observableImei: number
+    calcPoint: IPoint
+    randomPoint: IPoint
+    realPoint: IPoint
 }

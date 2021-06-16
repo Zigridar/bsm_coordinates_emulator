@@ -1,5 +1,6 @@
 import {CHANGE_SELECTION, CHANGE_VPT, SAVE_BACKGROUND, UPLOAD_LAYER} from '../actionTypes'
 import {fabric} from 'fabric'
+import {IDeletableFabric, VptCoords} from '../../../../src/commod_types/type'
 
 export type FabricState = {
     vptCoords: VptCoords

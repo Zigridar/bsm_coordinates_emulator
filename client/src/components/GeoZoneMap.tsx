@@ -4,6 +4,7 @@ import {Canvas, IEvent, ILineOptions} from 'fabric/fabric-impl'
 import {connect} from 'react-redux'
 import {RootState} from "../redux/store"
 import {changeSelection, changeVPT} from '../redux/ActionCreators'
+import {BSM, IDeletableFabric, IObservable, VptCoords} from "../../../src/commod_types/type";
 
 interface OwnProps {
     cardPadding: number

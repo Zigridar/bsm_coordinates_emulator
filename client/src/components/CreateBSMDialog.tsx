@@ -3,6 +3,7 @@ import {Button, Form, InputNumber, Modal, Tooltip} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
 import {fabric} from 'fabric'
 import {ColorResult, SketchPicker} from 'react-color'
+import {BSM, IPoint} from "../../../src/commod_types/type";
 
 
 type CreateBSMDialogProps = {

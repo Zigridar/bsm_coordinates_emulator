@@ -6,6 +6,7 @@ import {calcPointsByDataMap, parseLbsmData} from '../utils'
 import {connect} from 'react-redux'
 import {RootState} from "../redux/store"
 import {addStatRows, changeMode, setObservableCoords} from '../redux/ActionCreators'
+import {BSM, IObservable, ReducedSu, StatisticRow} from "../../../src/commod_types/type";
 
 interface OwnProps {
 

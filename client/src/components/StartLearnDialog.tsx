@@ -7,6 +7,7 @@ import {simplifyBSM} from "../utils"
 import {connect} from "react-redux"
 import {RootState} from "../redux/store"
 import {changeFraction, changeLearningMode, changeMinArea, changeRandomOdd} from "../redux/ActionCreators";
+import {BSM, LearnSteps, MessageFromLearnWorker, MessageFromMainThread, VptCoords} from "../../../src/commod_types/type";
 
 interface OwnProps {
 

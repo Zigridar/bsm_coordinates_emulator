@@ -6,6 +6,7 @@ import {SketchPicker} from "react-color"
 import {createObservable} from "../fabricUtils"
 import {RootState} from "../redux/store"
 import {addObservable} from "../redux/ActionCreators"
+import {IObservable} from "../../../src/commod_types/type";
 
 interface OwnProps {
 

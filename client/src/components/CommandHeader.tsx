@@ -30,9 +30,11 @@ import {
     deleteBSM
 } from '../redux/ActionCreators'
 import SaveBtn from './SaveFabricState'
-import {getBSMsFromStorage, getObservablesFromStorage, getRandomOddsFromStorage} from '../fabricUtils'
-import BackgroundImageDialog from "./BackImgDialog";
-import {getFromStorage} from "../utils";
+import {parseBsms, parseObservable, getRandomOddsFromStorage, parseStatistic} from '../fabricUtils';
+import BackgroundImageDialog from './BackImgDialog'
+import {getFromStorage} from '../utils'
+import {useHttp} from '../hooks/http.hook'
+import {BSM, IDeletableFabric, IObservable, RandomOddStorage, StatisticRow} from "../../../src/commod_types/type";
 
 interface OwnProps {
 
@@ -95,23 +97,28 @@ type CommandHeaderProps = OwnProps & StateProps & DispatchProps
 
 const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) => {
 
+    const { request } = useHttp()
+
     /** При первой инициализации добавить БСМ из локального хранилища */
     useEffect(() => {
-        /** Восстановление БСМ */
-        getBSMsFromStorage()
+        /** Запрос БСМ с сервера */
+        request('/bsm')
+            .then(res => parseBsms(res.bsm))
             .then(props.addBsms)
 
-        /** Восстановление объектов наблюдения */
-        getObservablesFromStorage()
+        /** Запрос объектов наблюдения */
+        request('/observable')
+            .then(res => parseObservable(res.observable))
             .then(props.addObservables)
 
         const rs = getRandomOddsFromStorage()
         if (rs)
             props.addRandomOdds(rs)
 
-        const statData = JSON.parse(getFromStorage(statisticStorage)) as StatisticRow[]
-        if (statData)
-            props.addStatRows(statData)
+        /** Запрос данных статистики */
+        request('/statistic')
+          .then(res => parseStatistic(res.statistics))
+          .then(props.addStatRows)
 
     }, [])
 

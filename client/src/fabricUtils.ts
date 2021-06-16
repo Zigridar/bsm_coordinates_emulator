@@ -1,8 +1,17 @@
 import {fabric} from 'fabric'
 import {IEvent} from 'fabric/fabric-impl'
-import {bsmStorage, observableStorage, randomOddStorage, STATIST_POINT_COUNT} from './constants'
+import {randomOddStorage, STATIST_POINT_COUNT} from './constants'
 import {calcAndDrawFantom, calcErrors, getFromStorage, setFakeRssi} from './utils'
 import store from './redux/store'
+import {IModelObservable} from "../../src/models/ModelObservable"
+import {
+    BSM,
+    IModelIBsm,
+    IModelStatistic,
+    IObservable,
+    RandomOddStorage,
+    StatisticRow
+} from '../../src/commod_types/type';
 
 type FantomShape = 'circle' | 'square'
 
@@ -96,11 +105,11 @@ export const createObservable = (imei: number, fakePointColor: string, calcPoint
     return observable
 }
 
-/** Восстановление fabric объектов из  строки */
-export const parseFabricObjectFromString: (stringObject: any) => Promise<fabric.Object> = (stringObject: any) => {
+/** Восстановление fabric объектов из сериализованного JSON fabric */
+export const parseFabricObjectFromSerialized: (stringObject: any) => Promise<fabric.Object> = (serializedFabricObject: any) => {
     return new Promise<fabric.Object>((resolve, reject) => {
         try {
-            fabric.util.enlivenObjects([stringObject], (fabricObjects: fabric.Object[]) => {
+            fabric.util.enlivenObjects([serializedFabricObject], (fabricObjects: fabric.Object[]) => {
                 resolve(fabricObjects[0])
             }, 'fabric')
         }
@@ -111,49 +120,49 @@ export const parseFabricObjectFromString: (stringObject: any) => Promise<fabric.
 }
 
 /** Сериализация (stringify) IObservable */
-export const serializeObservable: (obs: IObservable) => string = (obs: IObservable) => {
-    const serializedObservable: SerializedObservable = {
+export const serializeObservable: (obs: IObservable) => IModelObservable = (obs: IObservable) => {
+    const serializedObservable: IModelObservable = {
         imei: obs.imei,
         calculatedPoint: obs.calculatedPoint.toJSON(),
         fakePoint: obs.fakePoint.toJSON()
     }
-    return JSON.stringify(serializedObservable)
+    return serializedObservable
 }
 
-/** Сериализация (stringify) BSM */
-export const serializeBSM: (bsm: BSM) => string = (bsm: BSM) => {
-    const serializedBSM: SerializedBSM = {
+/** Сериализация BSM */
+export const serializeBSM: (bsm: BSM) => IModelIBsm = (bsm: BSM) => {
+    const serializedBSM: IModelIBsm = {
         imei: bsm.imei,
         outsideImei: bsm.outsideImei,
         rssi0: bsm.rssi0,
         r0: bsm.r0,
         object: bsm.object.toJSON()
     }
-    return JSON.stringify(serializedBSM)
+    return serializedBSM
 }
 
-export const deserializeObservable: (observableStr: string) => Promise<IObservable> = async (observableStr: string) => {
-    const serializedObservable = JSON.parse(observableStr) as SerializedObservable
+/** Сериализация StatisticRow */
+export const serializeStatistic: (statistic: StatisticRow) => IModelStatistic = (statistic: StatisticRow) => (statistic as IModelStatistic)
 
-    const fakePoint = await parseFabricObjectFromString(serializedObservable.fakePoint)
-    const calculatedPoint = await parseFabricObjectFromString(serializedObservable.calculatedPoint)
+export const deserializeObservable: (observable: IModelObservable) => Promise<IObservable> = async (observable: IModelObservable) => {
+
+    const fakePoint = await parseFabricObjectFromSerialized(observable.fakePoint)
+    const calculatedPoint = await parseFabricObjectFromSerialized(observable.calculatedPoint)
     fakePoint.set({ selectable: false, evented: false })
     calculatedPoint.set({ selectable: false, evented: false })
 
-    const observable: IObservable = {
-        imei: serializedObservable.imei,
+    const obs: IObservable = {
+        imei: observable.imei,
         fakePoint,
         calculatedPoint,
         movableObject: null
     }
-
-    return observable
+    return obs
 }
 
-export const deserializeBSM = async (bsmStr: string) => {
-    const serializedBSM = JSON.parse(bsmStr) as SerializedBSM
+export const deserializeBSM: (serializedBSM: IModelIBsm) => Promise<BSM> = async (serializedBSM: IModelIBsm) => {
 
-    const group = await parseFabricObjectFromString(serializedBSM.object) as fabric.Group
+    const group = await parseFabricObjectFromSerialized(serializedBSM.object) as fabric.Group
 
     const [, coordsTextObject, titleTextObject] = group.getObjects()
 
@@ -191,27 +200,23 @@ export const deserializeBSM = async (bsmStr: string) => {
     return bsm
 }
 
-/** Возвращает промис с BSM[] (десериализованными из локального хранилища)  */
-export const getBSMsFromStorage: () => Promise<BSM[]> = async () => {
-    const storageValue = JSON.parse(getFromStorage(bsmStorage)) as string[]
-
-    /** Если значение еще не задано вернуть пустой массив */
-    if (!storageValue) return []
-
-    const bsmPromises: Promise<BSM>[] = storageValue.map(bsmStr => deserializeBSM(bsmStr))
-    return await Promise.all(bsmPromises)
+export const deserializeStatistic: (statistic: IModelStatistic) => Promise<StatisticRow> = async (statistic: IModelStatistic) => {
+    return statistic as StatisticRow
 }
 
-/** Возвращает проим с IObservable[] (десериализованными из локального хранилища) */
-export const getObservablesFromStorage: () => Promise<IObservable[]> = async () => {
-    const storageValue = JSON.parse(getFromStorage(observableStorage)) as string[]
-
-    /** Если значение еще не задано вернуть пустой массив */
-    if (!storageValue) return []
-
-    const observablePromises: Promise<IObservable>[] = storageValue.map(observableStr => deserializeObservable(observableStr))
-    return await Promise.all(observablePromises)
+const parse = <S, D>(deserialize: (s: S) => Promise<D>) => async (collection: S[]) => {
+    const deserializedCollection = collection.map(deserialize)
+    return await Promise.all(deserializedCollection)
 }
+
+/** Возвращает промис с BSM[] */
+export const parseBsms: (collection: IModelIBsm[]) => Promise<BSM[]> = parse(deserializeBSM)
+
+/** Возвращает проим с IObservable[] */
+export const parseObservable: (collection: IModelObservable[]) => Promise<IObservable[]> = parse(deserializeObservable)
+
+/** Возвращает промис с StatisicRow[] */
+export const parseStatistic: (collection: IModelStatistic[]) => Promise<StatisticRow[]> = parse(deserializeStatistic)
 
 /** Возвращает сохраненные коэффициенты */
 export const getRandomOddsFromStorage: () => RandomOddStorage = () => JSON.parse(getFromStorage(randomOddStorage)) as RandomOddStorage

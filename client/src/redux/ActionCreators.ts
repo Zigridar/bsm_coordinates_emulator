@@ -1,11 +1,5 @@
-import {
-    AddBSMAction,
-    AddBSMsAction,
-    AddObservableAction,
-    AddObservablesAction,
-    DeleteBSMAction,
-    SetObservableCoordsAction
-} from './reducers/lps.reducer'
+import {fabric} from 'fabric';
+import {BSM, IObservable, RandomOddStorage, StatisticRow, VptCoords} from '../../../src/commod_types/type';
 import {
     ADD_BSM,
     ADD_BSMS,
@@ -27,16 +21,28 @@ import {
     SET_VALID_ROW,
     UPDATE_REAL_POINT,
     UPLOAD_LAYER
-} from './actionTypes'
+} from './actionTypes';
+import {
+    ChangeSelectionAction,
+    ChangeVPTCoordsAction,
+    SaveBackgroundAction,
+    UploadLayerAction
+} from './reducers/fabric.reducer';
+import {
+    AddBSMAction,
+    AddBSMsAction,
+    AddObservableAction,
+    AddObservablesAction,
+    DeleteBSMAction,
+    SetObservableCoordsAction
+} from './reducers/lps.reducer';
 import {
     AddRandomOdds,
     ChangeFractionAction,
     ChangeLearningAction,
     ChangeMinAreaAction,
     ChangeRandomOddAction
-} from "./reducers/random.reducer"
-import {ChangeModeAction} from "./reducers/test.reducer"
-import {fabric} from "fabric"
+} from './reducers/random.reducer';
 import {
     AddStatRows,
     DeleteStatRow,
@@ -44,13 +50,8 @@ import {
     SetValid,
     SetValidRow,
     UpdateRealPointAction
-} from "./reducers/statistic.reducer"
-import {
-    ChangeSelectionAction,
-    ChangeVPTCoordsAction,
-    SaveBackgroundAction,
-    UploadLayerAction
-} from "./reducers/fabric.reducer"
+} from './reducers/statistic.reducer';
+import {ChangeModeAction} from './reducers/test.reducer';
 
 export const addBsm = (bsm: BSM) => {
     const action: AddBSMAction = {

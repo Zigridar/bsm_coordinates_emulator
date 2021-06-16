@@ -1,5 +1,6 @@
 import {learn} from '../utils'
 import {LEARN_RESULT, PROGRESS, START_LEARNING} from './WorkerMessageTypes'
+import {MessageFromLearnWorker, MessageFromMainThread} from '../../../src/commod_types/type'
 
 const ctx: Worker = self as any
 

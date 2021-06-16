@@ -7,6 +7,7 @@ import {
     MIN_RANDOM_ODD,
     MIN_TRIANGLE_AREA
 } from './constants'
+import {BSM, IBSM, IPoint, LbsmData, LearnSteps, ReducedSu, StatisticRow} from "../../src/commod_types/type";
 
 export const vectorModule = (point1: IPoint, point2: IPoint) => {
     const dx = point1.x - point2.x

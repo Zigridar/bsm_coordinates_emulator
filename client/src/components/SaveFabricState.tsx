@@ -1,11 +1,13 @@
 import React from 'react'
-import {Button, Tooltip} from "antd"
+import {Button, Tooltip} from 'antd'
 import {SaveOutlined} from '@ant-design/icons'
 import {connect} from 'react-redux'
 import {RootState} from '../redux/store'
-import {serializeBSM, serializeObservable} from '../fabricUtils'
+import {serializeBSM, serializeObservable, serializeStatistic} from '../fabricUtils';
 import {saveToStorage} from '../utils'
-import {bsmStorage, observableStorage, randomOddStorage, statisticStorage} from '../constants'
+import {randomOddStorage, statisticStorage} from '../constants'
+import {useHttp} from '../hooks/http.hook'
+import {BSM, IObservable, RandomOddStorage, StatisticRow} from '../../../src/commod_types/type'
 
 interface OwnProps {
 
@@ -45,12 +47,22 @@ type SaveBTNProps = OwnProps & StateProps & DispatchProps
 
 const SaveBTN: React.FC<SaveBTNProps> = (props: SaveBTNProps) => {
 
+    const { request } = useHttp()
+
     const onClick = () => {
-        const serializedBSMs = props.bsmList.map(bsm => serializeBSM(bsm))
-        const serializedObservables = props.observables.map(observable => serializeObservable(observable))
-        saveToStorage(bsmStorage, JSON.stringify(serializedBSMs))
-        saveToStorage(observableStorage, JSON.stringify(serializedObservables))
-        saveToStorage(statisticStorage, JSON.stringify(props.statisticData))
+        const serializedBSMs = props.bsmList.map(serializeBSM)
+
+        //todo make it better
+        request('/bsm', 'POST', { bsm: serializedBSMs })
+
+        const serializedObservables = props.observables.map(serializeObservable)
+        //todo make it better
+        request('/observable', 'POST', { observable: serializedObservables })
+
+        const serializedStatistic = props.statisticData.map(serializeStatistic)
+        console.log(serializedStatistic);
+        //todo make it better
+        request('/statistic', 'POST', { statistic:  serializedStatistic })
 
         const randomStorage: RandomOddStorage = {
             fraction: props.fraction,

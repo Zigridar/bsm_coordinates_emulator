@@ -7,7 +7,7 @@ import {RootState} from '../redux/store'
 import {deleteStatisticRow, setValidRow, updateRealPoint} from '../redux/ActionCreators'
 import {RealPointUpdate, SetValid} from '../redux/reducers/statistic.reducer'
 import {CheckboxChangeEvent} from 'antd/lib/checkbox'
-
+import {IPoint, StatisticRow, StatTableRow} from "../../../src/commod_types/type";
 
 interface OwnProps {
 

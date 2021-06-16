@@ -4,6 +4,9 @@ import bodyParser from 'body-parser'
 import config from './config'
 import path from 'path'
 import mongoose from 'mongoose'
+import BsmRouter from './routes/bsmRouter'
+import ObservableRouter from './routes/observableRouter'
+import StatisticRouter from './routes/statisticRoter';
 
 const PORT = config.PORT || 8080
 
@@ -12,6 +15,15 @@ const app: Express = express()
 
 /** set body-parser **/
 app.use(bodyParser.json())
+
+/** bsm routes */
+app.use('/bsm', BsmRouter)
+
+/** observable routes */
+app.use('/observable', ObservableRouter)
+
+/** statistic router */
+app.use('/statistic', StatisticRouter)
 
 /** Production mode **/
 if (process.env.NODE_ENV === 'production') {
