@@ -1,12 +1,13 @@
-'use strict'
-import express, {Express} from 'express'
+'use strict';
 import bodyParser from 'body-parser'
-import config from './config'
-import path from 'path'
+import express, {Express} from 'express'
 import mongoose from 'mongoose'
+import path from 'path'
+import runAutoBackup from './backup/autoBackup'
+import config from './config'
 import BsmRouter from './routes/bsmRouter'
 import ObservableRouter from './routes/observableRouter'
-import StatisticRouter from './routes/statisticRoter';
+import StatisticRouter from './routes/statisticRoter'
 
 const PORT = config.PORT || 8080
 
@@ -62,4 +63,5 @@ async function start() {
 start()
     .then(() => {
         console.info(`App startup at ${(new Date()).toTimeString()}`)
+        runAutoBackup()
     })
