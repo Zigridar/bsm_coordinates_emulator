@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "readme": "restore script \"cross-env dbname={DBNAME} archive={ARCHIVE_NAME} node ./dist/backup/restore.js\"",
   "scripts": {
     "build:front": "webpack -c ./client/webpack.config.js",
     "build:back": "tsc",
@@ -21,6 +22,7 @@
     "html-webpack-plugin": "^4.5.1",
     "lodash": "^4.17.21",
     "mongodb-backup": "^1.6.9",
+    "mongodb-restore": "^1.6.2",
     "mongoose": "^5.12.7",
     "node-cron": "^3.0.0",
     "react": "^17.0.1",
