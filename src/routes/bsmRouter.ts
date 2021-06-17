@@ -4,6 +4,7 @@ import {IModelIBsm} from '../commod_types/type'
 
 const BsmRouter: Router = Router()
 
+/** get all bsm */
 BsmRouter.get(
     '/',
     async (req: express.Request, res: express.Response) => {
@@ -14,6 +15,7 @@ BsmRouter.get(
     }
 )
 
+/** create or update bsm */
 BsmRouter.post(
     '/',
     async (req: express.Request, res: express.Response) => {
@@ -53,6 +55,7 @@ BsmRouter.post(
     }
 )
 
+/** delete bsm */
 BsmRouter.delete(
   '/',
   async (req: express.Request, res: express.Response) => {

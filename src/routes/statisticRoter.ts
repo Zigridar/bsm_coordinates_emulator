@@ -4,6 +4,7 @@ import ModelStatistic from '../models/ModelStatistic';
 
 const StatisticRouter: Router = Router()
 
+/** get all statistics */
 StatisticRouter.get(
   '/',
   async (req: express.Request, res: express.Response) => {
@@ -14,6 +15,7 @@ StatisticRouter.get(
   }
 )
 
+/** create or update statistic */
 StatisticRouter.post(
   '/',
   async (req: express.Request, res: express.Response) => {

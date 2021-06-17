@@ -4,6 +4,7 @@ import ModelObservable from '../models/ModelObservable';
 
 const ObservableRouter: Router = Router()
 
+/** get all observables */
 ObservableRouter.get(
     '/',
     async (req: express.Request, res: express.Response) => {
@@ -14,6 +15,7 @@ ObservableRouter.get(
     }
 )
 
+/** create or update observable */
 ObservableRouter.post(
     '/',
     async (req: express.Request, res: express.Response) => {
@@ -49,6 +51,7 @@ ObservableRouter.post(
     }
 )
 
+/** delete observable */
 ObservableRouter.delete(
   '/',
   async (req: express.Request, res: express.Response) => {
