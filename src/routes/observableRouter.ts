@@ -1,5 +1,6 @@
 import express, {Router} from 'express';
-import ModelObservable, {IModelObservable} from '../models/ModelObservable';
+import {IModelObservable} from '../commod_types/type';
+import ModelObservable from '../models/ModelObservable';
 
 const ObservableRouter: Router = Router()
 

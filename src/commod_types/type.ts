@@ -129,3 +129,9 @@ export interface IModelStatistic {
     randomPoint: IPoint
     realPoint: IPoint
 }
+
+export interface IModelObservable {
+    imei: number
+    fakePoint: any
+    calculatedPoint: any
+}

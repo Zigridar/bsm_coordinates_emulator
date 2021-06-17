@@ -3,10 +3,9 @@ import {IEvent} from 'fabric/fabric-impl'
 import {randomOddStorage, STATIST_POINT_COUNT} from './constants'
 import {calcAndDrawFantom, calcErrors, getFromStorage, setFakeRssi} from './utils'
 import store from './redux/store'
-import {IModelObservable} from "../../src/models/ModelObservable"
 import {
     BSM,
-    IModelIBsm,
+    IModelIBsm, IModelObservable,
     IModelStatistic,
     IObservable,
     RandomOddStorage,
