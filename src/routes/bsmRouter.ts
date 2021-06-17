@@ -18,33 +18,58 @@ BsmRouter.post(
     '/',
     async (req: express.Request, res: express.Response) => {
         try {
-            const clientBsms = req.body.bsm
-
-            //todo crutch
-            await ModelBsm.deleteMany()
+            const clientBsms = req.body.bsm as IModelIBsm[]
 
             if (clientBsms) {
-                const bsms = clientBsms as IModelIBsm[]
 
-                for (const clientBsm of bsms) {
-                    const bsm = new ModelBsm()
-                    bsm.imei = clientBsm.imei
-                    bsm.outsideImei = clientBsm.outsideImei
-                    bsm.rssi0 = clientBsm.rssi0
-                    bsm.r0 = clientBsm.r0
-                    bsm.object = clientBsm.object
-                    await bsm.save()
+              for (const clientBsm of clientBsms) {
+                const bsm = await ModelBsm.findOne({ imei: clientBsm.imei })
+                if (bsm) {
+                  bsm.imei = clientBsm.imei
+                  bsm.outsideImei = clientBsm.outsideImei
+                  bsm.rssi0 = clientBsm.rssi0
+                  bsm.r0 = clientBsm.r0
+                  bsm.object = clientBsm.object
+                  await bsm.save()
                 }
+                else {
+                  const bsm = new ModelBsm()
+                  bsm.imei = clientBsm.imei
+                  bsm.outsideImei = clientBsm.outsideImei
+                  bsm.rssi0 = clientBsm.rssi0
+                  bsm.r0 = clientBsm.r0
+                  bsm.object = clientBsm.object
+                  await bsm.save()
+                }
+              }
             }
 
+            res.json({ message: 'successfully save' })
         }
         catch (e) {
             console.error(e)
-        }
-        finally {
-            res.end()
+          res.json({ message: 'error' })
         }
     }
+)
+
+BsmRouter.delete(
+  '/',
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const clientBsms = req.body.bsm as IModelIBsm[]
+
+      if (clientBsms) {
+        await ModelBsm.deleteMany( { imei: { $in: clientBsms.map(bsm => bsm.imei)} } )
+      }
+
+      res.json({ message: 'successfully deleted' })
+    }
+    catch (e) {
+      console.error(e)
+      res.json({ message: 'error' })
+    }
+  }
 )
 
 export default BsmRouter

@@ -1,5 +1,5 @@
-import express, {Router} from 'express'
-import ModelObservable, {IModelObservable} from '../models/ModelObservable'
+import express, {Router} from 'express';
+import ModelObservable, {IModelObservable} from '../models/ModelObservable';
 
 const ObservableRouter: Router = Router()
 
@@ -17,31 +17,54 @@ ObservableRouter.post(
     '/',
     async (req: express.Request, res: express.Response) => {
         try {
-            const clientObservables = req.body.observable
+          const clientObservables = req.body.observable as IModelObservable[]
 
-            //todo crutch
-            await ModelObservable.deleteMany()
+          if (clientObservables) {
 
-            if (clientObservables) {
-                const observables = clientObservables as IModelObservable[]
-
-                for (const clientObservable of observables) {
-                    const observable = new ModelObservable()
-                    observable.imei = clientObservable.imei
-                    observable.fakePoint = clientObservable.fakePoint
-                    observable.calculatedPoint = clientObservable.calculatedPoint
-                    await observable.save()
-                }
+            for (const clientObservable of clientObservables) {
+              const observable = await ModelObservable.findOne({ imei: clientObservable.imei })
+              if (observable) {
+                observable.imei = clientObservable.imei
+                observable.fakePoint = clientObservable.fakePoint
+                observable.calculatedPoint = clientObservable.calculatedPoint
+                await observable.save()
+              }
+              else {
+                const observable = new ModelObservable()
+                observable.imei = clientObservable.imei
+                observable.fakePoint = clientObservable.fakePoint
+                observable.calculatedPoint = clientObservable.calculatedPoint
+                await observable.save()
+              }
             }
+          }
 
+          res.json({ message: 'successfully saved' })
         }
         catch (e) {
             console.error(e)
-        }
-        finally {
-            res.end()
+          res.send({ message: 'error' })
         }
     }
+)
+
+ObservableRouter.delete(
+  '/',
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const clientObservables = req.body.observable as IModelObservable[]
+
+      if (clientObservables) {
+        await ModelObservable.deleteMany( { imei: { $in: clientObservables.map(bsm => bsm.imei)} } )
+      }
+
+      res.json({ message: 'successfully deleted' })
+    }
+    catch (e) {
+      console.error(e)
+      res.json({ message: 'error' })
+    }
+  }
 )
 
 export default ObservableRouter
