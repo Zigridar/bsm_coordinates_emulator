@@ -1,40 +1,40 @@
-import {Header} from 'antd/es/layout/layout'
-import React, {useEffect} from 'react'
-import {connect} from 'react-redux'
-import {fabric} from 'fabric'
-import {Button, Slider, Space, Statistic, Switch, Tooltip} from 'antd'
-import {DeleteOutlined} from '@ant-design/icons/lib'
-import CreateBSMDialog from './CreateBSMDialog'
+import {DeleteOutlined} from '@ant-design/icons/lib';
+import {Button, Slider, Space, Statistic, Switch, Tooltip} from 'antd';
+import {Header} from 'antd/es/layout/layout';
+import {fabric} from 'fabric';
+import React, {useEffect} from 'react';
+import {connect} from 'react-redux';
+import {BSM, IDeletableFabric, IObservable, RandomOddStorage, StatisticRow} from '../../../src/commod_types/type';
 import {
     MAX_FRACTION,
     MAX_RANDOM_ODD,
     MAX_TRIANGLE_AREA,
     MIN_FRACTION,
     MIN_RANDOM_ODD,
-    MIN_TRIANGLE_AREA, statisticStorage
-} from '../constants'
-import LearningDialog from './StartLearnDialog'
-import LoadJSONDataDialog from './LoadJSONDataDialog'
-import CreateObservableDialog from './CreateObservableDialog'
-import StatisticDialog from './StatisticDialog'
-import {RootState} from '../redux/store'
+    MIN_TRIANGLE_AREA
+} from '../constants';
+import {getRandomOddsFromStorage, parseBsms, parseObservable, parseStatistic} from '../fabricUtils';
+import {useHttp} from '../hooks/http.hook';
 import {
     addBsm,
     addBsms,
     addObservables,
-    addRandomOdds, addStatRows,
+    addRandomOdds,
+    addStatRows,
     changeFraction,
     changeMinArea,
     changeMode,
     changeRandomOdd,
     deleteBSM
-} from '../redux/ActionCreators'
-import SaveBtn from './SaveFabricState'
-import {parseBsms, parseObservable, getRandomOddsFromStorage, parseStatistic} from '../fabricUtils';
-import BackgroundImageDialog from './BackImgDialog'
-import {getFromStorage} from '../utils'
-import {useHttp} from '../hooks/http.hook'
-import {BSM, IDeletableFabric, IObservable, RandomOddStorage, StatisticRow} from "../../../src/commod_types/type";
+} from '../redux/ActionCreators';
+import {RootState} from '../redux/store';
+import BackgroundImageDialog from './BackImgDialog';
+import CreateBSMDialog from './CreateBSMDialog';
+import CreateObservableDialog from './CreateObservableDialog';
+import LoadJSONDataDialog from './LoadJSONDataDialog';
+import SaveBtn from './SaveFabricState';
+import LearningDialog from './StartLearnDialog';
+import StatisticDialog from './StatisticDialog';
 
 interface OwnProps {
 
@@ -99,7 +99,7 @@ const CommandHeader: React.FC<CommandHeaderProps> = (props: CommandHeaderProps) 
 
     const { request } = useHttp()
 
-    /** При первой инициализации добавить БСМ из локального хранилища */
+    /** При первой инициализации загрузить данные с сервера */
     useEffect(() => {
         /** Запрос БСМ с сервера */
         request('/bsm')
