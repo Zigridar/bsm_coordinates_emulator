@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "readme": "restore script \"cross-env dbname={DBNAME} archive={ARCHIVE_NAME} node ./dist/backup/restore.js\"",
+  "readme": "restore script \"cross-env archive={ARCHIVE_NAME} node ./dist/backup/restore.js\"",
   "scripts": {
     "build:front": "webpack -c ./client/webpack.config.js",
     "build:back": "tsc",

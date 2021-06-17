@@ -14,7 +14,7 @@ const options = () =>  {
 
   return {
     uri: config.MONGO_URI,
-    root: __dirname,
+    root: config.backupDir,
     tar: `${fileName}.tar`,
     callback
   }
